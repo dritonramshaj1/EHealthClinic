@@ -1,0 +1,10 @@
+@base=https://localhost:5001
+
+### Login (default admin)
+POST {{base}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@ehealth.local",
+  "password": "Admin1234!"
+}
