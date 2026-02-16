@@ -27,7 +27,11 @@ public sealed class AppointmentsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> List([FromQuery] DateTime? fromUtc, [FromQuery] DateTime? toUtc)
+    public async Task<ActionResult> List(
+        [FromQuery] DateTime? fromUtc,
+        [FromQuery] DateTime? toUtc,
+        [FromQuery] string? status,
+        [FromQuery] string? search)
     {
         var userId = User.GetUserId();
         var roles = User.Claims.Where(c => c.Type.EndsWith("/role") || c.Type.EndsWith("role") || c.Type.Contains("role", StringComparison.OrdinalIgnoreCase))
@@ -40,6 +44,18 @@ public sealed class AppointmentsController : ControllerBase
 
         if (fromUtc is not null) q = q.Where(a => a.StartsAtUtc >= fromUtc);
         if (toUtc is not null) q = q.Where(a => a.StartsAtUtc <= toUtc);
+
+        if (!string.IsNullOrWhiteSpace(status))
+            q = q.Where(a => a.Status.ToLower() == status.Trim().ToLower());
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLower();
+            q = q.Where(a =>
+                a.Doctor.User.FullName.ToLower().Contains(s) ||
+                a.Patient.User.FullName.ToLower().Contains(s) ||
+                (a.Reason != null && a.Reason.ToLower().Contains(s)));
+        }
 
         if (roles.Contains(Roles.Admin))
         {
