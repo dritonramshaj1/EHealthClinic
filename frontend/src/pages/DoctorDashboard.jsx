@@ -202,8 +202,9 @@ export default function DoctorDashboard() {
             📅 My Appointments
             <div className="flex-center gap-2">
               <span className="badge">{appointments.length}</span>
-              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'csv')}>⬇ CSV</button>
-              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'json')}>⬇ JSON</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'xlsx')}>📊 Excel</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'pdf')}>📄 PDF</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'docx')}>📝 Word</button>
             </div>
           </div>
           <form className="flex gap-2 mb-3" onSubmit={searchAppointments} style={{ flexWrap: 'wrap', alignItems: 'center' }}>

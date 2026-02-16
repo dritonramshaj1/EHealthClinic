@@ -199,10 +199,15 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick exports */}
-      <div className="flex gap-2 mb-4" style={{ flexWrap: 'wrap' }}>
-        <span className="text-sm text-muted" style={{ alignSelf: 'center' }}>Export:</span>
-        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/patients', 'patients', 'csv')}>👥 Patients CSV</button>
-        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/patients', 'patients', 'json')}>👥 Patients JSON</button>
+      <div className="flex gap-2 mb-4" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+        <span className="text-sm text-muted">Export patients:</span>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/patients', 'patients', 'xlsx')}>📊 Excel</button>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/patients', 'patients', 'pdf')}>📄 PDF</button>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/patients', 'patients', 'docx')}>📝 Word</button>
+        <span className="text-sm text-muted" style={{ marginLeft: 12 }}>Project log:</span>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/project-log', 'project_log', 'xlsx')}>📊 Excel</button>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/project-log', 'project_log', 'pdf')}>📄 PDF</button>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/project-log', 'project_log', 'docx')}>📝 Word</button>
       </div>
 
       {/* Appointments + Notifications */}
@@ -213,8 +218,9 @@ export default function AdminDashboard() {
             <div className="flex-center gap-2">
               <span className="badge badge-warning">{scheduledCount} scheduled</span>
               <span className="badge badge-success">{completedCount} completed</span>
-              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'csv')}>⬇ CSV</button>
-              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'json')}>⬇ JSON</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'xlsx')}>📊 Excel</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'pdf')}>📄 PDF</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'docx')}>📝 Word</button>
             </div>
           </div>
           <form className="flex gap-2 mb-3" onSubmit={searchAppointments} style={{ flexWrap: 'wrap', alignItems: 'center' }}>

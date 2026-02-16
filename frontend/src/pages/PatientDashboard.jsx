@@ -104,8 +104,9 @@ export default function PatientDashboard() {
             📅 My Appointments
             <div className="flex-center gap-2">
               <span className="badge">{appointments.length}</span>
-              <button className="btn-ghost btn-sm" onClick={() => exportAppointments('csv')}>⬇ CSV</button>
-              <button className="btn-ghost btn-sm" onClick={() => exportAppointments('json')}>⬇ JSON</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportAppointments('xlsx')}>📊 Excel</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportAppointments('pdf')}>📄 PDF</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportAppointments('docx')}>📝 Word</button>
             </div>
           </div>
           <div className="list">
