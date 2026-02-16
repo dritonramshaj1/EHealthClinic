@@ -25,30 +25,46 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container">
-      <div className="card">
-        <div className="nav">
-          <h2>Login</h2>
-          <span className="badge">E-Health Clinic</span>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">
+          <div className="auth-logo-icon">🏥</div>
+          <h1>EHealth Clinic</h1>
+          <p>Sign in to your account</p>
         </div>
 
-        <form onSubmit={onSubmit} className="list">
-          <div>
-            <label className="small">Email</label>
-            <input value={email} onChange={e => setEmail(e.target.value)} />
-          </div>
-          <div>
-            <label className="small">Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+        <form onSubmit={onSubmit} className="form-stack">
+          <div className="form-group">
+            <label>Email address</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="email"
+            />
           </div>
 
-          {error && <div className="item" style={{ borderColor: '#f2b8b5' }}>{error}</div>}
-
-          <button disabled={loading}>{loading ? 'Signing in...' : 'Sign in'}</button>
-
-          <div className="small">
-            No account? <Link to="/register">Register</Link>
+          <div className="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
           </div>
+
+          {error && <div className="alert alert-error">{error}</div>}
+
+          <button disabled={loading} style={{ width: '100%', marginTop: 4 }}>
+            {loading ? 'Signing in...' : 'Sign in →'}
+          </button>
+
+          <p className="text-sm text-muted" style={{ textAlign: 'center', marginTop: 8 }}>
+            Don't have an account? <Link to="/register">Register</Link>
+          </p>
         </form>
       </div>
     </div>

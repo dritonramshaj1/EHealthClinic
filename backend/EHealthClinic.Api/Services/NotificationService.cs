@@ -37,4 +37,12 @@ public sealed class NotificationService : INotificationService
     {
         await _col.UpdateOneAsync(x => x.Id == id, Builders<NotificationDoc>.Update.Set(x => x.Read, true));
     }
+
+    public async Task MarkAllReadAsync(Guid userId)
+    {
+        await _col.UpdateManyAsync(
+            x => x.UserId == userId && !x.Read,
+            Builders<NotificationDoc>.Update.Set(x => x.Read, true)
+        );
+    }
 }
