@@ -25,10 +25,18 @@ public sealed class NotificationsController : ControllerBase
         return Ok(items);
     }
 
-    [HttpPost("{id}/read")]
+    [HttpPatch("{id}/read")]
     public async Task<ActionResult> MarkRead(string id)
     {
         await _notifications.MarkReadAsync(id);
+        return NoContent();
+    }
+
+    [HttpPatch("read-all")]
+    public async Task<ActionResult> MarkAllRead()
+    {
+        var userId = User.GetUserId();
+        await _notifications.MarkAllReadAsync(userId);
         return NoContent();
     }
 }
