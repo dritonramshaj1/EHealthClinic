@@ -61,7 +61,10 @@ export default function Dashboard() {
     }
   }
 
-  useEffect(() => { load() }, [])
+  // useEffect(() => { load() }, [])
+  useEffect(() => {
+    if(user) load()
+  }, [user])
 
   async function createAppointment(e) {
     e.preventDefault()
