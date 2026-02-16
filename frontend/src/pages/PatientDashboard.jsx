@@ -33,6 +33,18 @@ export default function PatientDashboard() {
 
   useEffect(() => { if (user) load() }, [user])
 
+  async function exportAppointments(format = 'csv') {
+    try {
+      const res = await api.get('/export/appointments', { params: { format }, responseType: 'blob' })
+      const url = URL.createObjectURL(res.data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `my-appointments.${format}`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch { /* silent */ }
+  }
+
   async function markRead(id) {
     try {
       await api.patch(`/notifications/${id}/read`)
@@ -90,7 +102,11 @@ export default function PatientDashboard() {
         <div className="card">
           <div className="card-title">
             📅 My Appointments
-            <span className="badge">{appointments.length}</span>
+            <div className="flex-center gap-2">
+              <span className="badge">{appointments.length}</span>
+              <button className="btn-ghost btn-sm" onClick={() => exportAppointments('csv')}>⬇ CSV</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportAppointments('json')}>⬇ JSON</button>
+            </div>
           </div>
           <div className="list">
             {appointments.length === 0 && (
