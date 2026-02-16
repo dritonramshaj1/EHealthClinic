@@ -26,23 +26,14 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
-    //options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    //{
-    //    Name = "Authorization",
-    //    Type = SecuritySchemeType.Http,
-    //    Scheme = "bearer",
-    //    BearerFormat = "JWT",
-    //    In = ParameterLocation.Header,
-    //    Description = "Enter 'Bearer' [space] and then your valid token."
-    //});
-
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Enter Bearer and then your token",
         Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Description = "Enter 'Bearer' [space] and then your valid token."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
