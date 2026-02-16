@@ -30,6 +30,12 @@ export default function AdminDashboard() {
   const [mrDescription, setMrDescription] = useState('')
   const [addingMr, setAddingMr] = useState(false)
 
+  // Search filters
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterSearch, setFilterSearch] = useState('')
+  const [filterFrom, setFilterFrom] = useState('')
+  const [filterTo, setFilterTo] = useState('')
+
   async function load() {
     setError(null)
     try {
@@ -66,6 +72,44 @@ export default function AdminDashboard() {
       await api.patch('/notifications/read-all')
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     } catch { /* silent */ }
+  }
+
+  async function searchAppointments(e) {
+    e.preventDefault()
+    setError(null)
+    try {
+      const params = {}
+      if (filterStatus) params.status = filterStatus
+      if (filterSearch) params.search = filterSearch
+      if (filterFrom) params.fromUtc = new Date(filterFrom).toISOString()
+      if (filterTo) params.toUtc = new Date(filterTo).toISOString()
+      const res = await api.get('/appointments', { params })
+      setAppointments(res.data)
+    } catch (e) {
+      setError(e?.response?.data?.error || 'Search failed')
+    }
+  }
+
+  async function clearFilters() {
+    setFilterStatus('')
+    setFilterSearch('')
+    setFilterFrom('')
+    setFilterTo('')
+    await load()
+  }
+
+  async function exportData(endpoint, filename, format = 'csv') {
+    try {
+      const params = { format }
+      if (filterStatus) params.status = filterStatus
+      const res = await api.get(endpoint, { params, responseType: 'blob' })
+      const url = URL.createObjectURL(res.data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${filename}.${format}`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch { setError('Export failed') }
   }
 
   async function createAppointment(e) {
@@ -154,6 +198,13 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Quick exports */}
+      <div className="flex gap-2 mb-4" style={{ flexWrap: 'wrap' }}>
+        <span className="text-sm text-muted" style={{ alignSelf: 'center' }}>Export:</span>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/patients', 'patients', 'csv')}>👥 Patients CSV</button>
+        <button className="btn-ghost btn-sm" onClick={() => exportData('/export/patients', 'patients', 'json')}>👥 Patients JSON</button>
+      </div>
+
       {/* Appointments + Notifications */}
       <div className="row">
         <div className="card">
@@ -162,8 +213,28 @@ export default function AdminDashboard() {
             <div className="flex-center gap-2">
               <span className="badge badge-warning">{scheduledCount} scheduled</span>
               <span className="badge badge-success">{completedCount} completed</span>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'csv')}>⬇ CSV</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'json')}>⬇ JSON</button>
             </div>
           </div>
+          <form className="flex gap-2 mb-3" onSubmit={searchAppointments} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ flex: '0 0 auto', minWidth: 120 }}>
+              <option value="">All statuses</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+            <input
+              placeholder="Search name or reason..."
+              value={filterSearch}
+              onChange={e => setFilterSearch(e.target.value)}
+              style={{ flex: 1, minWidth: 140 }}
+            />
+            <input type="date" value={filterFrom} onChange={e => setFilterFrom(e.target.value)} style={{ flex: '0 0 auto' }} />
+            <input type="date" value={filterTo} onChange={e => setFilterTo(e.target.value)} style={{ flex: '0 0 auto' }} />
+            <button type="submit" style={{ flex: '0 0 auto' }}>Search</button>
+            <button type="button" className="secondary" onClick={clearFilters} style={{ flex: '0 0 auto' }}>Clear</button>
+          </form>
           <div className="list">
             {appointments.length === 0 && (
               <div className="empty-state">
