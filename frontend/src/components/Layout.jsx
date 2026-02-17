@@ -12,7 +12,7 @@ export default function Layout({ children }) {
         </div>
         <div className="nav-user">
           <span className="badge badge-primary">{(roles || []).join(', ')}</span>
-          <span className="text-sm text-muted" style={{ fontWeight: 500 }}>{user?.fullName}</span>
+          <a href="/profile" className="btn-ghost btn-sm" style={{ textDecoration: 'none' }}>👤 {user?.fullName}</a>
           <button className="btn-ghost btn-sm" onClick={logout}>Logout</button>
         </div>
       </nav>
