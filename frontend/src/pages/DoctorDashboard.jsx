@@ -4,6 +4,8 @@ import { useAuth } from '../state/AuthContext.jsx'
 import Layout from '../components/Layout.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import Spinner from '../components/Spinner.jsx'
+import AnalyticsCharts from '../components/AnalyticsCharts.jsx'
+import NotificationPanel from '../components/NotificationPanel.jsx'
 
 export default function DoctorDashboard() {
   const { user } = useAuth()
@@ -98,20 +100,6 @@ export default function DoctorDashboard() {
     } catch { setError('Export failed') }
   }
 
-  async function markRead(id) {
-    try {
-      await api.patch(`/notifications/${id}/read`)
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
-    } catch { /* silent */ }
-  }
-
-  async function markAllRead() {
-    try {
-      await api.patch('/notifications/read-all')
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    } catch { /* silent */ }
-  }
-
   async function createAppointment(e) {
     e.preventDefault()
     setError(null)
@@ -158,7 +146,6 @@ export default function DoctorDashboard() {
     }
   }
 
-  const unreadCount = notifications.filter(n => !n.read).length
   const scheduledCount = appointments.filter(a => a.status === 'Scheduled').length
 
   if (loading) return <Layout><Spinner /></Layout>
@@ -189,11 +176,13 @@ export default function DoctorDashboard() {
           <div className="stat-label">Total Patients</div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">🔔</div>
-          <div className="stat-value">{unreadCount}</div>
+          <div className="stat-value">{notifications.filter(n => !n.read).length}</div>
           <div className="stat-label">Unread Notifications</div>
         </div>
       </div>
+
+      {/* Analytics Charts */}
+      <AnalyticsCharts isAdmin={false} />
 
       {/* Appointments + Notifications */}
       <div className="row">
@@ -202,8 +191,9 @@ export default function DoctorDashboard() {
             📅 My Appointments
             <div className="flex-center gap-2">
               <span className="badge">{appointments.length}</span>
-              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'csv')}>⬇ CSV</button>
-              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'json')}>⬇ JSON</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'xlsx')}>📊 Excel</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'pdf')}>📄 PDF</button>
+              <button className="btn-ghost btn-sm" onClick={() => exportData('/export/appointments', 'appointments', 'docx')}>📝 Word</button>
             </div>
           </div>
           <form className="flex gap-2 mb-3" onSubmit={searchAppointments} style={{ flexWrap: 'wrap', alignItems: 'center' }}>
@@ -246,39 +236,7 @@ export default function DoctorDashboard() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-title">
-            🔔 Notifications
-            <div className="flex-center gap-2">
-              {unreadCount > 0 && (
-                <button className="btn-ghost btn-sm" onClick={markAllRead}>Mark all read</button>
-              )}
-              <span className="badge">{unreadCount} new</span>
-            </div>
-          </div>
-          <div className="list">
-            {notifications.length === 0 && (
-              <div className="empty-state">
-                <div className="empty-state-icon">🔕</div>
-                No notifications
-              </div>
-            )}
-            {notifications.map(n => (
-              <div key={n.id} className={`item ${!n.read ? 'item-unread' : ''}`}>
-                <div className="flex-between mb-1">
-                  <span className={`badge ${n.read ? '' : 'badge-primary'}`}>{n.type}</span>
-                  {!n.read && (
-                    <button className="btn-ghost btn-sm" onClick={() => markRead(n.id)}>
-                      Mark read
-                    </button>
-                  )}
-                </div>
-                <div className="text-sm mt-1">{n.message}</div>
-                <div className="text-xs text-muted mt-1">{new Date(n.createdAtUtc).toLocaleString()}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <NotificationPanel notifications={notifications} onUpdate={setNotifications} />
       </div>
 
       {/* Create Appointment + Add Medical Record */}
