@@ -13,6 +13,7 @@ public sealed class NotificationDoc
     public string Type { get; set; } = "Info";
     public string Message { get; set; } = "";
     public bool Read { get; set; } = false;
+    public DateTime? ReadAtUtc { get; set; }
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }
