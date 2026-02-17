@@ -18,10 +18,10 @@ public sealed class NotificationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> List([FromQuery] int limit = 50)
+    public async Task<ActionResult> List([FromQuery] int limit = 50, [FromQuery] string? type = null)
     {
         var userId = User.GetUserId();
-        var items = await _notifications.GetForUserAsync(userId, Math.Clamp(limit, 1, 200));
+        var items = await _notifications.GetForUserAsync(userId, Math.Clamp(limit, 1, 200), type);
         return Ok(items);
     }
 
