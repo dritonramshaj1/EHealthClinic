@@ -149,6 +149,7 @@ button.secondary:hover:not(:disabled), .btn-secondary:hover:not(:disabled) { bac
 .item { padding: 13px 15px; border: 1px solid var(--gray-200); border-radius: var(--radius); background: var(--gray-50); transition: border-color 0.15s, background 0.15s; }
 .item:hover { border-color: var(--gray-300); background: var(--white); }
 .item-unread { border-left: 3px solid var(--primary); background: var(--primary-light); border-top-color: var(--primary-border); border-right-color: var(--primary-border); border-bottom-color: var(--primary-border); }
+.item-read { opacity: 0.70; border-left: 3px solid var(--gray-300); }
 
 /* Alerts */
 .alert { padding: 12px 15px; border-radius: var(--radius); font-size: 13px; border: 1px solid; font-weight: 500; }
