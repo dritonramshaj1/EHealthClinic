@@ -14,9 +14,13 @@ public sealed class NotificationService : INotificationService
         _col = ctx.Collection<NotificationDoc>(CollectionName);
     }
 
-    public async Task<List<NotificationDoc>> GetForUserAsync(Guid userId, int limit = 50)
+    public async Task<List<NotificationDoc>> GetForUserAsync(Guid userId, int limit = 50, string? type = null)
     {
-        return await _col.Find(x => x.UserId == userId)
+        var filter = Builders<NotificationDoc>.Filter.Eq(x => x.UserId, userId);
+        if (!string.IsNullOrWhiteSpace(type))
+            filter &= Builders<NotificationDoc>.Filter.Eq(x => x.Type, type);
+
+        return await _col.Find(filter)
             .SortByDescending(x => x.CreatedAtUtc)
             .Limit(limit)
             .ToListAsync();
@@ -35,14 +39,20 @@ public sealed class NotificationService : INotificationService
 
     public async Task MarkReadAsync(string id)
     {
-        await _col.UpdateOneAsync(x => x.Id == id, Builders<NotificationDoc>.Update.Set(x => x.Read, true));
+        var now = DateTime.UtcNow;
+        await _col.UpdateOneAsync(x => x.Id == id,
+            Builders<NotificationDoc>.Update
+                .Set(x => x.Read, true)
+                .Set(x => x.ReadAtUtc, now));
     }
 
     public async Task MarkAllReadAsync(Guid userId)
     {
+        var now = DateTime.UtcNow;
         await _col.UpdateManyAsync(
             x => x.UserId == userId && !x.Read,
-            Builders<NotificationDoc>.Update.Set(x => x.Read, true)
-        );
+            Builders<NotificationDoc>.Update
+                .Set(x => x.Read, true)
+                .Set(x => x.ReadAtUtc, now));
     }
 }
