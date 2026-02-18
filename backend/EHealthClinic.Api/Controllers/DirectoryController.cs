@@ -36,7 +36,7 @@ public sealed class DirectoryController : ControllerBase
     }
 
     [HttpGet("patients")]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Doctor}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Doctor},{Roles.Receptionist},{Roles.LabTechnician},{Roles.Pharmacist},{Roles.HRManager}")]
     public async Task<ActionResult> Patients([FromQuery] string? q)
     {
         var query = _db.Patients.Include(p => p.User).AsQueryable();
@@ -49,6 +49,7 @@ public sealed class DirectoryController : ControllerBase
         var list = await query.OrderBy(p => p.User.FullName).Take(50).Select(p => new
         {
             p.Id,
+            UserId = p.UserId,
             Name = p.User.FullName,
             Email = p.User.Email
         }).ToListAsync();
