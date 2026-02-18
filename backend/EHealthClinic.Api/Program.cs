@@ -1,29 +1,29 @@
+using EHealthClinic.Api.Authorization;
 using EHealthClinic.Api.Data;
 using EHealthClinic.Api.Entities;
 using EHealthClinic.Api.Models;
 using EHealthClinic.Api.Mongo;
 using EHealthClinic.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers + Swagger
+// ── Controllers + Swagger ─────────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "EHealthClinic.Api",
-        Version = "v1"
+        Title = "EHealthClinic API",
+        Version = "v1",
+        Description = "Enterprise Clinic Management System API"
     });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -47,12 +47,12 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
     });
 });
 
-// CORS (React dev server)
+// ── CORS ─────────────────────────────────────────────────────────
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 builder.Services.AddCors(opt =>
 {
@@ -65,7 +65,7 @@ builder.Services.AddCors(opt =>
     });
 });
 
-// SQL Server + Identity
+// ── SQL Server + Identity ─────────────────────────────────────────
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
@@ -79,13 +79,12 @@ builder.Services
         opt.Password.RequireUppercase = false;
         opt.Password.RequireNonAlphanumeric = false;
         opt.Password.RequiredLength = 8;
-
         opt.User.RequireUniqueEmail = true;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// JWT
+// ── JWT Authentication ────────────────────────────────────────────
 var jwtSection = builder.Configuration.GetSection("Jwt");
 builder.Services.Configure<JwtOptions>(jwtSection);
 
@@ -112,16 +111,35 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// MongoDB
+// ── RBAC — Permission-based Authorization ────────────────────────
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+
+// ── MongoDB ───────────────────────────────────────────────────────
 builder.Services.Configure<MongoOptions>(builder.Configuration.GetSection("Mongo"));
 builder.Services.AddSingleton<IMongoContext, MongoContext>();
 
-// App services
+// ── Application Services (existing) ──────────────────────────────
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
+
+// ── Application Services (new) ───────────────────────────────────
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IBranchService, BranchService>();
+builder.Services.AddScoped<IQueueService, QueueService>();
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<ILabService, LabService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IHRService, HRService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<IMessagingService, MessagingService>();
+
+// ── HTTP Context Accessor (needed for IP in audit logs) ──────────
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -134,13 +152,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
-// Ensure DB + roles + default admin (dev-friendly)
+// ── Startup: DB migration + seed ─────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
