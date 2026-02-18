@@ -70,7 +70,7 @@ public static class PermissionMatrix
             Permissions.BillingRead,      Permissions.BillingWrite,
             Permissions.InsuranceRead,
             Permissions.DocumentsRead,    Permissions.DocumentsWrite,
-            Permissions.MessagesRead,
+            Permissions.MessagesRead,     Permissions.MessagesWrite,
             Permissions.NotificationsRead,
         },
 
@@ -79,7 +79,7 @@ public static class PermissionMatrix
             Permissions.PatientsRead,
             Permissions.LabRead,  Permissions.LabWrite,
             Permissions.DocumentsRead,
-            Permissions.MessagesRead,
+            Permissions.MessagesRead, Permissions.MessagesWrite,
             Permissions.NotificationsRead,
         },
 
@@ -88,7 +88,7 @@ public static class PermissionMatrix
             Permissions.PatientsRead,
             Permissions.PrescriptionsRead, Permissions.PrescriptionsWrite,
             Permissions.InventoryRead,     Permissions.InventoryWrite,
-            Permissions.MessagesRead,
+            Permissions.MessagesRead,      Permissions.MessagesWrite,
             Permissions.NotificationsRead,
         },
 
@@ -97,7 +97,7 @@ public static class PermissionMatrix
             Permissions.HrRead,   Permissions.HrWrite,
             Permissions.UsersRead,
             Permissions.ReportsRead,
-            Permissions.MessagesRead,
+            Permissions.MessagesRead, Permissions.MessagesWrite,
             Permissions.NotificationsRead,
         },
     };
