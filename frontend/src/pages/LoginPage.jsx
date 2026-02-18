@@ -5,8 +5,8 @@ import { useAuth } from '../state/AuthContext.jsx'
 export default function LoginPage() {
   const { login } = useAuth()
   const nav = useNavigate()
-  const [email, setEmail] = useState('admin@ehealth.local')
-  const [password, setPassword] = useState('Admin1234!')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -35,31 +35,35 @@ export default function LoginPage() {
 
         <form onSubmit={onSubmit} className="form-stack">
           <div className="form-group">
-            <label>Email address</label>
+            <label className="form-label">Email</label>
             <input
               type="email"
+              className="form-control"
               placeholder="you@example.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
               autoComplete="email"
+              required
             />
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label className="form-label">Password</label>
             <input
               type="password"
+              className="form-control"
               placeholder="••••••••"
               value={password}
               onChange={e => setPassword(e.target.value)}
               autoComplete="current-password"
+              required
             />
           </div>
 
-          {error && <div className="alert alert-error">{error}</div>}
+          {error && <div className="alert alert-danger">{error}</div>}
 
-          <button disabled={loading} style={{ width: '100%', marginTop: 4 }}>
-            {loading ? 'Signing in...' : 'Sign in →'}
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%' }}>
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
 
           <p className="text-sm text-muted" style={{ textAlign: 'center', marginTop: 8 }}>
