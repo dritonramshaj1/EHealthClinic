@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { api } from '../api/axios.js'
+import { getPrimaryRole, getPermissions } from './PermissionMatrix.js'
 
 const AuthContext = createContext(null)
 
@@ -64,11 +65,18 @@ export function AuthProvider({ children }) {
     }
   }, [auth?.accessToken, auth?.refreshToken])
 
+  const roles = auth?.user?.roles || []
+  const primaryRole = getPrimaryRole(roles)
+  const permissions = getPermissions(roles)
+
   const value = useMemo(() => ({
     auth,
     isLoggedIn: !!auth?.accessToken,
-    roles: auth?.user?.roles || [],
+    roles,
+    primaryRole,
     user: auth?.user || null,
+    hasPermission: (perm) => permissions.has(perm),
+    hasRole: (role) => roles.includes(role),
     async login(email, password) {
       const r = await api.post('/auth/login', { email, password })
       setAuth({
