@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EHealthClinic.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/messages")]
 [Authorize]
 public sealed class MessagingController : ControllerBase
 {
