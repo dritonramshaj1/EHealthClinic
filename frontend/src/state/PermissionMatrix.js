@@ -51,24 +51,27 @@ export const PermissionMatrix = {
     'billing.read', 'billing.write',
     'insurance.read',
     'documents.read', 'documents.write',
-    'messages.read',
+    'messages.read', 'messages.write',
     'notifications.read',
   ],
   LabTechnician: [
     'patients.read',
     'lab.read', 'lab.write',
     'documents.read',
+    'messages.read', 'messages.write',
     'notifications.read',
   ],
   Pharmacist: [
     'prescriptions.read', 'prescriptions.write',
     'inventory.read', 'inventory.write',
+    'messages.read', 'messages.write',
     'notifications.read',
   ],
   HRManager: [
     'hr.read', 'hr.write',
     'users.read',
     'reports.read',
+    'messages.read', 'messages.write',
     'notifications.read',
   ],
 }

@@ -9,13 +9,24 @@ import { messagesApi } from '../../api/services/messagesApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
 
+// Kush mund t’i dërgojë mesazhe kujt (sipas rolit). Patient vetëm doktorëve; të tjerët me messages.write → doktorë + pacientë.
+const RECIPIENT_BY_ROLE = {
+  Patient: 'doctors',
+  Doctor: 'doctors_and_patients',
+  Admin: 'doctors_and_patients',
+  Receptionist: 'doctors_and_patients',
+  LabTechnician: 'doctors_and_patients',
+  Pharmacist: 'doctors_and_patients',
+  HRManager: 'doctors_and_patients',
+}
+
 function formatDate(d) {
   if (!d) return '—'
   return new Date(d).toLocaleString()
 }
 
 export default function MessagesPage() {
-  const { user, hasPermission } = useAuth()
+  const { user, hasPermission, primaryRole } = useAuth()
   const [tab, setTab] = useState('inbox')
   const [inbox, setInbox] = useState([])
   const [sent, setSent] = useState([])
@@ -25,7 +36,7 @@ export default function MessagesPage() {
   const [thread, setThread] = useState([])
   const [threadId, setThreadId] = useState(null)
 
-  const [doctors, setDoctors] = useState([])
+  const [recipients, setRecipients] = useState([]) // { value: userId, label }
   const [recipientId, setRecipientId] = useState('')
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
@@ -40,11 +51,39 @@ export default function MessagesPage() {
     Promise.all([loadInbox(), loadSent()]).finally(() => setLoading(false))
   }, [])
 
+  // Ngarkim marrësish sipas rolit (RECIPIENT_BY_ROLE). Vetëm rolet me messages.write shohin butonin "New message".
   useEffect(() => {
-    if (composeOpen) {
-      directoryApi.getDoctors().then(res => setDoctors(res.data || [])).catch(() => setDoctors([]))
+    if (!composeOpen || !hasPermission('messages.write')) return
+    const rule = RECIPIENT_BY_ROLE[primaryRole] ?? 'doctors_and_patients'
+    if (rule === 'doctors') {
+      directoryApi.getDoctors().then(res => {
+        const list = (res.data || []).filter(d => d.userId).map(d => ({
+          value: String(d.userId),
+          label: `${d.name}${d.specialty ? ` (${d.specialty})` : ''}`,
+        }))
+        setRecipients(list)
+      }).catch(() => setRecipients([]))
+    } else {
+      const buildDoctors = (data) => (data || []).filter(d => d.userId).map(d => ({
+        value: String(d.userId),
+        label: `${d.name}${d.specialty ? ` (${d.specialty})` : ''} – Doctor`,
+      }))
+      directoryApi.getDoctors()
+        .then(drRes => {
+          const doctors = buildDoctors(drRes.data)
+          directoryApi.getPatients()
+            .then(prRes => {
+              const patients = (prRes.data || []).filter(p => p.userId).map(p => ({
+                value: String(p.userId),
+                label: `${p.name} – Patient`,
+              }))
+              setRecipients([...doctors, ...patients])
+            })
+            .catch(() => setRecipients(doctors))
+        })
+        .catch(() => setRecipients([]))
     }
-  }, [composeOpen])
+  }, [composeOpen, primaryRole, hasPermission])
 
   const openThread = (msg) => {
     setThreadId(msg.threadId)
@@ -64,7 +103,7 @@ export default function MessagesPage() {
     setSending(true)
     messagesApi.send({
       senderId: user?.id,
-      recipientId: recipientId,
+      recipientId,
       subject: subject.trim() || '(No subject)',
       body: body.trim() || '',
     })
@@ -76,7 +115,10 @@ export default function MessagesPage() {
         loadSent()
         loadInbox()
       })
-      .catch(err => setSendError(err.response?.data?.message || 'Failed to send'))
+      .catch(err => {
+        const msg = err.response?.data?.message ?? err.response?.data?.title ?? err.message
+        setSendError(msg || 'Failed to send')
+      })
       .finally(() => setSending(false))
   }
 
@@ -88,7 +130,7 @@ export default function MessagesPage() {
     { key: 'createdAtUtc', header: 'Date', render: row => formatDate(row.createdAtUtc) },
   ]
 
-  const recipientOptions = doctors.map(d => ({ value: d.userId, label: `${d.name}${d.specialty ? ` (${d.specialty})` : ''}` }))
+  const recipientOptions = recipients
 
   return (
     <>
@@ -145,8 +187,11 @@ export default function MessagesPage() {
               options={recipientOptions}
               value={recipientId}
               onChange={setRecipientId}
-              placeholder="Select recipient (doctor)"
+              placeholder={recipientOptions.length ? 'Select recipient' : 'No recipients available'}
             />
+            {composeOpen && !recipientOptions.length && (
+              <p className="text-sm text-muted mt-1">No recipients in directory for your role.</p>
+            )}
           </FormField>
           <FormField label="Subject">
             <input
