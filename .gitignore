@@ -22,3 +22,9 @@ Thumbs.db
 
 # Mongo local data
 data/
+
+# Uploaded documents (binary files, not versioned)
+backend/EHealthClinic.Api/Storage/
+
+# Claude Code local settings
+.claude/
