@@ -1,5 +1,7 @@
+using EHealthClinic.Api.Hubs;
 using EHealthClinic.Api.Mongo;
 using EHealthClinic.Api.Mongo.Documents;
+using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;
 
 namespace EHealthClinic.Api.Services;
@@ -8,10 +10,12 @@ public sealed class NotificationService : INotificationService
 {
     private const string CollectionName = "notifications";
     private readonly IMongoCollection<NotificationDoc> _col;
+    private readonly IHubContext<NotificationsHub> _hub;
 
-    public NotificationService(IMongoContext ctx)
+    public NotificationService(IMongoContext ctx, IHubContext<NotificationsHub> hub)
     {
         _col = ctx.Collection<NotificationDoc>(CollectionName);
+        _hub = hub;
     }
 
     public async Task<List<NotificationDoc>> GetForUserAsync(Guid userId, int limit = 50, string? type = null)
@@ -28,13 +32,18 @@ public sealed class NotificationService : INotificationService
 
     public async Task CreateAsync(Guid userId, string type, string message)
     {
-        await _col.InsertOneAsync(new NotificationDoc
+        var doc = new NotificationDoc
         {
             UserId = userId,
             Type = type,
             Message = message,
             CreatedAtUtc = DateTime.UtcNow
-        });
+        };
+        await _col.InsertOneAsync(doc);
+
+        // Real-time: push to the user's SignalR connection(s)
+        var payload = new { id = doc.Id, type, message, createdAtUtc = doc.CreatedAtUtc };
+        await _hub.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", payload);
     }
 
     public async Task MarkReadAsync(string id)
