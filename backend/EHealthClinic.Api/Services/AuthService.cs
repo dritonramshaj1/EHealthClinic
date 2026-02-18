@@ -22,7 +22,8 @@ public sealed class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest req)
     {
-        var role = NormalizeRole(req.Role);
+        // Public registration: only Patient. Other roles are created by Admin via Users API.
+        var role = Roles.Patient;
 
         var user = new AppUser
         {
@@ -143,9 +144,8 @@ public sealed class AuthService : IAuthService
     private static string NormalizeRole(string role)
     {
         var r = role?.Trim() ?? "";
-        if (string.Equals(r, Roles.Admin, StringComparison.OrdinalIgnoreCase)) return Roles.Admin;
-        if (string.Equals(r, Roles.Doctor, StringComparison.OrdinalIgnoreCase)) return Roles.Doctor;
-        if (string.Equals(r, Roles.Patient, StringComparison.OrdinalIgnoreCase)) return Roles.Patient;
-        throw new InvalidOperationException("Role must be Admin, Doctor, or Patient.");
+        foreach (var name in Roles.All)
+            if (string.Equals(r, name, StringComparison.OrdinalIgnoreCase)) return name;
+        throw new InvalidOperationException($"Role must be one of: {string.Join(", ", Roles.All)}.");
     }
 }
