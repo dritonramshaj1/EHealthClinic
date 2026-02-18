@@ -8,6 +8,7 @@ const NAV_SECTIONS = [
     label: 'Main',
     items: [
       { to: '/dashboard', icon: '🏠', label: 'Dashboard' },
+      { to: '/notifications', icon: '🔔', label: 'Notifications', perm: 'notifications.read' },
       { to: '/messages', icon: '✉️', label: 'Messages', perm: 'messages.read' },
     ],
   },
