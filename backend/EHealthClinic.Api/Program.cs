@@ -109,6 +109,21 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromSeconds(30)
     };
+    // SignalR WebSockets send token in query string (no Authorization header)
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = ctx =>
+        {
+            var path = ctx.Request.Path.ToString();
+            if (path.StartsWith("/hubs/", StringComparison.OrdinalIgnoreCase))
+            {
+                var token = ctx.Request.Query["access_token"].FirstOrDefault();
+                if (!string.IsNullOrEmpty(token))
+                    ctx.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // ── RBAC — Permission-based Authorization ────────────────────────
@@ -138,6 +153,9 @@ builder.Services.AddScoped<IHRService, HRService>();
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();
 
+// ── SignalR (real-time notifications) ───────────────────────────
+builder.Services.AddSignalR();
+
 // ── HTTP Context Accessor (needed for IP in audit logs) ──────────
 builder.Services.AddHttpContextAccessor();
 
@@ -155,6 +173,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<EHealthClinic.Api.Hubs.NotificationsHub>("/hubs/notifications");
 
 // ── Startup: DB migration + seed ─────────────────────────────────
 using (var scope = app.Services.CreateScope())
