@@ -35,6 +35,7 @@ const ShiftsPage = lazy(() => import('./pages/hr/ShiftsPage.jsx'))
 const LeaveRequestsPage = lazy(() => import('./pages/hr/LeaveRequestsPage.jsx'))
 const DocumentsPage = lazy(() => import('./pages/documents/DocumentsPage.jsx'))
 const MessagesPage = lazy(() => import('./pages/messages/MessagesPage.jsx'))
+const NotificationsPage = lazy(() => import('./pages/notifications/NotificationsPage.jsx'))
 const ReportsPage = lazy(() => import('./pages/reports/ReportsPage.jsx'))
 const AuditPage = lazy(() => import('./pages/audit/AuditPage.jsx'))
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage.jsx'))
@@ -85,6 +86,7 @@ export default function App() {
         <Route path="hr/leave" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="hr.read"><LeaveRequestsPage /></PermissionRoute></Suspense>} />
 
         <Route path="messages" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="messages.read"><MessagesPage /></PermissionRoute></Suspense>} />
+        <Route path="notifications" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="notifications.read"><NotificationsPage /></PermissionRoute></Suspense>} />
         <Route path="reports" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="reports.read"><ReportsPage /></PermissionRoute></Suspense>} />
         <Route path="audit" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="audit.read"><AuditPage /></PermissionRoute></Suspense>} />
         <Route path="settings" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="settings.read"><SettingsPage /></PermissionRoute></Suspense>} />
