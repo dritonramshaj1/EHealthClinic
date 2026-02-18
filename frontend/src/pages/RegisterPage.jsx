@@ -8,9 +8,7 @@ export default function RegisterPage() {
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('User1234!')
-  const [role, setRole] = useState('Patient')
-
+  const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -19,7 +17,7 @@ export default function RegisterPage() {
     setError(null)
     setLoading(true)
     try {
-      await register(fullName, email, password, role)
+      await register(fullName, email, password, 'Patient')
       nav('/dashboard')
     } catch (e) {
       setError(e?.response?.data?.error || 'Register failed')
@@ -34,56 +32,54 @@ export default function RegisterPage() {
         <div className="auth-logo">
           <div className="auth-logo-icon">🏥</div>
           <h1>Create account</h1>
-          <p>Join EHealth Clinic as <span className="badge badge-primary">{role}</span></p>
+          <p>Register as a patient. Other roles are created by an administrator.</p>
         </div>
 
         <form onSubmit={onSubmit} className="form-stack">
           <div className="form-group">
-            <label>Full name</label>
+            <label className="form-label">Full name</label>
             <input
+              type="text"
+              className="form-control"
               placeholder="John Doe"
               value={fullName}
               onChange={e => setFullName(e.target.value)}
               autoComplete="name"
+              required
             />
           </div>
 
           <div className="form-group">
-            <label>Email address</label>
+            <label className="form-label">Email</label>
             <input
               type="email"
+              className="form-control"
               placeholder="you@example.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
               autoComplete="email"
+              required
             />
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label className="form-label">Password</label>
             <input
               type="password"
+              className="form-control"
               placeholder="Min. 8 characters"
               value={password}
               onChange={e => setPassword(e.target.value)}
               autoComplete="new-password"
+              minLength={6}
+              required
             />
           </div>
 
-          <div className="form-group">
-            <label>Role</label>
-            <select value={role} onChange={e => setRole(e.target.value)}>
-              <option value="Patient">🧑‍⚕️ Patient</option>
-              <option value="Doctor">👨‍⚕️ Doctor</option>
-              <option value="Admin">🛡️ Admin</option>
-            </select>
-            <p className="text-xs text-muted" style={{ marginTop: 4 }}>In production, Admin creation is restricted.</p>
-          </div>
+          {error && <div className="alert alert-danger">{error}</div>}
 
-          {error && <div className="alert alert-error">{error}</div>}
-
-          <button disabled={loading} style={{ width: '100%', marginTop: 4 }}>
-            {loading ? 'Creating account...' : 'Create account →'}
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%' }}>
+            {loading ? 'Creating account...' : 'Create account'}
           </button>
 
           <p className="text-sm text-muted" style={{ textAlign: 'center', marginTop: 8 }}>
