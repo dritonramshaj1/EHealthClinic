@@ -9,4 +9,7 @@ public sealed class AppUser : IdentityUser<Guid>
     public bool IsDisabled { get; set; } = false;
 
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
+    public Guid? BranchId { get; set; }
+    public Branch? Branch { get; set; }
 }

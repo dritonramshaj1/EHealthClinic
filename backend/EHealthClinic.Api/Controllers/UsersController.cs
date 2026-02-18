@@ -27,6 +27,13 @@ public sealed class UsersController : ControllerBase
         _logs = logs;
     }
 
+    /// <summary>List all role names (Admin only).</summary>
+    [HttpGet("roles")]
+    public ActionResult GetRoles()
+    {
+        return Ok(Roles.All);
+    }
+
     [HttpGet]
     public async Task<ActionResult> List([FromQuery] string? role = null)
     {
@@ -103,13 +110,11 @@ public sealed class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] CreateUserRequest req)
     {
-        var validRoles = new[] { Roles.Admin, Roles.Doctor, Roles.Patient };
         var role = req.Role?.Trim() ?? "";
-        if (!validRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
-            return BadRequest(new { error = "Role must be Admin, Doctor, or Patient." });
+        if (!Roles.All.Contains(role, StringComparer.OrdinalIgnoreCase))
+            return BadRequest(new { error = $"Role must be one of: {string.Join(", ", Roles.All)}." });
 
-        // Normalize role casing
-        role = validRoles.First(r => r.Equals(role, StringComparison.OrdinalIgnoreCase));
+        role = Roles.All.First(r => r.Equals(role, StringComparison.OrdinalIgnoreCase));
 
         var user = new AppUser
         {

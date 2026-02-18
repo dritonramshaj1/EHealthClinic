@@ -27,6 +27,7 @@ public sealed class DirectoryController : ControllerBase
         var list = await query.OrderBy(d => d.User.FullName).Take(50).Select(d => new
         {
             d.Id,
+            UserId = d.UserId,
             d.Specialty,
             Name = d.User.FullName
         }).ToListAsync();
