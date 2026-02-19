@@ -3,9 +3,18 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { useUI } from '../../state/UIContext.jsx'
 import { messagesApi } from '../../api/services/messagesApi.js'
+import { notificationsApi } from '../../api/services/notificationsApi.js'
 
 function getInitials(name = '') {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+}
+
+function formatNotifDate(d) {
+  if (!d) return ''
+  const date = new Date(d)
+  const now = new Date()
+  const sameDay = date.toDateString() === now.toDateString()
+  return sameDay ? date.toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit' }) : date.toLocaleDateString('sq-AL')
 }
 
 export default function TopBar() {
@@ -13,8 +22,18 @@ export default function TopBar() {
   const { toggleSidebar, darkMode, toggleDarkMode } = useUI()
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [notifications, setNotifications] = useState([])
   const dropdownRef = useRef(null)
+  const notificationsRef = useRef(null)
+
+  const loadNotifications = () => {
+    if (!hasPermission?.('notifications.read')) return
+    notificationsApi.list({ limit: 8 })
+      .then(res => setNotifications(res.data || []))
+      .catch(() => setNotifications([]))
+  }
 
   useEffect(() => {
     if (!hasPermission?.('messages.read')) return
@@ -27,12 +46,19 @@ export default function TopBar() {
     return () => clearInterval(t)
   }, [hasPermission])
 
-  // Close dropdown on outside click
+  useEffect(() => {
+    loadNotifications()
+    const handler = () => loadNotifications()
+    window.addEventListener('ehealth:notification', handler)
+    return () => window.removeEventListener('ehealth:notification', handler)
+  }, [hasPermission])
+
+  const notificationUnreadCount = notifications.filter(n => !n.read).length
+
   useEffect(() => {
     function handler(e) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setDropdownOpen(false)
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setDropdownOpen(false)
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target)) setNotificationsOpen(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -62,6 +88,49 @@ export default function TopBar() {
 
       {/* Right actions */}
       <div className="topbar-right">
+        {/* Notifications */}
+        {hasPermission?.('notifications.read') && (
+          <div className="dropdown" ref={notificationsRef}>
+            <button
+              type="button"
+              className="topbar-icon-btn"
+              onClick={() => setNotificationsOpen(v => !v)}
+              title="Njoftimet"
+            >
+              🔔
+              {notificationUnreadCount > 0 && (
+                <span className="topbar-badge">{notificationUnreadCount > 99 ? '99+' : notificationUnreadCount}</span>
+              )}
+            </button>
+            {notificationsOpen && (
+              <div className="dropdown-menu dropdown-menu-notifications">
+                <div className="dropdown-header">
+                  <strong>Njoftimet</strong>
+                  <Link to="/notifications" onClick={() => setNotificationsOpen(false)} className="dropdown-link-sm">
+                    Shiko të gjitha
+                  </Link>
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="dropdown-item text-secondary text-sm">Nuk ka njoftime</div>
+                ) : (
+                  notifications.map(n => (
+                    <Link
+                      key={n.id}
+                      to="/notifications"
+                      onClick={() => setNotificationsOpen(false)}
+                      className={`dropdown-item dropdown-item-notification ${!n.read ? 'unread' : ''}`}
+                    >
+                      <span className="dropdown-notif-type">{n.type}</span>
+                      <span className="dropdown-notif-message">{n.message}</span>
+                      <span className="dropdown-notif-time">{formatNotifDate(n.createdAtUtc)}</span>
+                    </Link>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Dark mode */}
         <button
           className="topbar-icon-btn"
