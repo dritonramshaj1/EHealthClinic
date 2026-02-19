@@ -1,3 +1,4 @@
+using EHealthClinic.Api.Data;
 using EHealthClinic.Api.Dtos;
 using EHealthClinic.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,11 +13,15 @@ public sealed class PrescriptionsController : ControllerBase
 {
     private readonly IPrescriptionService _prescriptions;
     private readonly IAuditService _audit;
+    private readonly INotificationService _notifications;
+    private readonly ApplicationDbContext _db;
 
-    public PrescriptionsController(IPrescriptionService prescriptions, IAuditService audit)
+    public PrescriptionsController(IPrescriptionService prescriptions, IAuditService audit, INotificationService notifications, ApplicationDbContext db)
     {
         _prescriptions = prescriptions;
         _audit = audit;
+        _notifications = notifications;
+        _db = db;
     }
 
     [HttpGet]
@@ -43,6 +48,9 @@ public sealed class PrescriptionsController : ControllerBase
     {
         var result = await _prescriptions.CreateAsync(request);
         await _audit.LogAsync(GetUserId(), "Create", "Prescription", result.Id.ToString(), $"Prescription issued for patient {result.PatientId}");
+        var patient = await _db.Patients.FindAsync(result.PatientId);
+        if (patient != null)
+            await _notifications.CreateAsync(patient.UserId, "Prescription", "Ju është lëshuar një recetë e re. Kontrolloni te Recetat.");
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 

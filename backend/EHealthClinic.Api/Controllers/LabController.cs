@@ -1,3 +1,4 @@
+using EHealthClinic.Api.Data;
 using EHealthClinic.Api.Dtos;
 using EHealthClinic.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,11 +13,15 @@ public sealed class LabController : ControllerBase
 {
     private readonly ILabService _lab;
     private readonly IAuditService _audit;
+    private readonly INotificationService _notifications;
+    private readonly ApplicationDbContext _db;
 
-    public LabController(ILabService lab, IAuditService audit)
+    public LabController(ILabService lab, IAuditService audit, INotificationService notifications, ApplicationDbContext db)
     {
         _lab = lab;
         _audit = audit;
+        _notifications = notifications;
+        _db = db;
     }
 
     [HttpGet("orders")]
@@ -67,8 +72,18 @@ public sealed class LabController : ControllerBase
     [Authorize(Policy = "lab.write")]
     public async Task<IActionResult> AddResult(Guid orderId, [FromBody] CreateLabResultRequest request)
     {
+        var order = await _lab.GetOrderByIdAsync(orderId);
+        if (order is null) return NotFound();
+
         var result = await _lab.AddResultAsync(orderId, request);
         await _audit.LogAsync(GetUserId(), "Create", "LabResult", result.Id.ToString(), $"Result added for order {orderId}");
+
+        var doctor = await _db.Doctors.FindAsync(order.DoctorId);
+        if (doctor != null)
+            await _notifications.CreateAsync(doctor.UserId, "Lab", $"Rezultat i ri i analizës për porosinë e lab (test: {result.TestName}).");
+        var patient = await _db.Patients.FindAsync(order.PatientId);
+        if (patient != null)
+            await _notifications.CreateAsync(patient.UserId, "Lab", "Rezultatet e analizës tuaja janë gatuar. Kontrolloni në Laborator.");
         return Ok(result);
     }
 
