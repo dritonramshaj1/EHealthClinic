@@ -12,11 +12,13 @@ public sealed class MessagingController : ControllerBase
 {
     private readonly IMessagingService _messaging;
     private readonly IAuditService _audit;
+    private readonly INotificationService _notifications;
 
-    public MessagingController(IMessagingService messaging, IAuditService audit)
+    public MessagingController(IMessagingService messaging, IAuditService audit, INotificationService notifications)
     {
         _messaging = messaging;
         _audit = audit;
+        _notifications = notifications;
     }
 
     [HttpGet("inbox")]
@@ -51,6 +53,7 @@ public sealed class MessagingController : ControllerBase
     {
         request = request with { SenderId = GetUserId() };
         var result = await _messaging.SendAsync(request);
+        await _notifications.CreateAsync(request.RecipientId, "Message", $"Mesazh i ri: {request.Subject}");
         return Ok(result);
     }
 
