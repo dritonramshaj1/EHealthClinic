@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal.jsx'
 import FormField from '../../components/ui/FormField.jsx'
 import Select from '../../components/ui/Select.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
+import ExportDropdown from '../../components/ui/ExportDropdown.jsx'
 import { appointmentsApi } from '../../api/services/appointmentsApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
@@ -107,11 +108,16 @@ export default function AppointmentsPage() {
         title="Appointments"
         subtitle="View and manage appointments"
         actions={
-          hasPermission('appointments.write') && (
-            <Button variant="primary" onClick={() => setComposeOpen(true)}>
-              New Appointment
-            </Button>
-          )
+          <div className="d-flex gap-2 align-items-center flex-wrap">
+            {hasPermission('appointments.read') && (
+              <ExportDropdown resource="appointments" params={statusFilter ? { status: statusFilter } : {}} />
+            )}
+            {hasPermission('appointments.write') && (
+              <Button variant="primary" onClick={() => setComposeOpen(true)}>
+                New Appointment
+              </Button>
+            )}
+          </div>
         }
       />
       <Card>
