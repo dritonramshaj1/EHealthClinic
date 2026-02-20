@@ -8,6 +8,7 @@ import Modal from '../../components/ui/Modal.jsx'
 import FormField from '../../components/ui/FormField.jsx'
 import Select from '../../components/ui/Select.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
+import ExportDropdown from '../../components/ui/ExportDropdown.jsx'
 import { invoicesApi } from '../../api/services/invoicesApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
@@ -105,9 +106,14 @@ export default function InvoicesPage() {
         title="Invoices"
         subtitle="Billing and payments"
         actions={
-          hasPermission('billing.write') && (
-            <Button variant="primary" onClick={() => setCreateOpen(true)}>New Invoice</Button>
-          )
+          <div className="d-flex gap-2 align-items-center flex-wrap">
+            {hasPermission('billing.read') && (
+              <ExportDropdown resource="invoices" params={statusFilter ? { status: statusFilter } : {}} />
+            )}
+            {hasPermission('billing.write') && (
+              <Button variant="primary" onClick={() => setCreateOpen(true)}>New Invoice</Button>
+            )}
+          </div>
         }
       />
       <Card>
