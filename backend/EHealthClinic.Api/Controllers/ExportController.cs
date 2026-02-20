@@ -141,6 +141,67 @@ public sealed class ExportController : ControllerBase
         };
     }
 
+    // ─── Invoices ───────────────────────────────────────────────────────────────
+
+    [HttpGet("invoices")]
+    [Authorize(Policy = "billing.read")]
+    public async Task<ActionResult> ExportInvoices(
+        [FromQuery] string format = "xlsx",
+        [FromQuery] Guid? patientId = null,
+        [FromQuery] string? status = null)
+    {
+        var q = _db.Invoices
+            .Include(i => i.Patient).ThenInclude(p => p.User)
+            .AsQueryable();
+
+        if (patientId.HasValue) q = q.Where(i => i.PatientId == patientId.Value);
+        if (!string.IsNullOrWhiteSpace(status))
+            q = q.Where(i => i.Status.ToLower() == status.Trim().ToLower());
+
+        var list = await q.OrderByDescending(i => i.IssuedAtUtc)
+            .Select(i => new
+            {
+                InvoiceNumber = i.InvoiceNumber,
+                PatientName   = i.Patient.User.FullName,
+                Subtotal      = i.Subtotal,
+                TaxAmount     = i.TaxAmount,
+                TotalAmount   = i.TotalAmount,
+                Currency      = i.Currency ?? "EUR",
+                i.Status,
+                IssuedAt      = i.IssuedAtUtc.ToString("yyyy-MM-dd"),
+                DueAt         = i.DueAtUtc.HasValue ? i.DueAtUtc.Value.ToString("yyyy-MM-dd") : "",
+                PaidAt        = i.PaidAtUtc.HasValue ? i.PaidAtUtc.Value.ToString("yyyy-MM-dd") : "",
+                Notes         = i.Notes ?? ""
+            })
+            .ToListAsync();
+
+        string[] headers = ["Invoice #", "Patient", "Subtotal", "Tax", "Total", "Currency", "Status", "Issued", "Due", "Paid", "Notes"];
+        string[][] rows  = list.Select(i => new[]
+        {
+            i.InvoiceNumber,
+            i.PatientName,
+            i.Subtotal.ToString("F2"),
+            i.TaxAmount.ToString("F2"),
+            i.TotalAmount.ToString("F2"),
+            i.Currency,
+            i.Status,
+            i.IssuedAt,
+            i.DueAt,
+            i.PaidAt,
+            i.Notes
+        }).ToArray();
+
+        string date = DateTime.UtcNow.ToString("yyyyMMdd");
+        return format.ToLower() switch
+        {
+            "json" => Ok(list),
+            "csv"  => CsvResult(headers, rows, $"invoices_{date}.csv"),
+            "pdf"  => PdfResult("Invoices Report", headers, rows, $"invoices_{date}.pdf"),
+            "docx" => DocxResult("Invoices Report", headers, rows, $"invoices_{date}.docx"),
+            _      => XlsxResult("Invoices Report", headers, rows, $"invoices_{date}.xlsx")
+        };
+    }
+
     // ─── Medical Records ──────────────────────────────────────────────────────
 
     [HttpGet("medical-records/{patientId:guid}")]
