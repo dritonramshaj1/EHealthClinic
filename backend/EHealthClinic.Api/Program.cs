@@ -4,6 +4,7 @@ using EHealthClinic.Api.Entities;
 using EHealthClinic.Api.Models;
 using EHealthClinic.Api.Mongo;
 using EHealthClinic.Api.Services;
+using EHealthClinic.Api.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +26,11 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Description = "Enterprise Clinic Management System API"
     });
+
+    // Avoid duplicate schema ids (can cause 500 when generating swagger.json)
+    options.CustomSchemaIds(type => type.FullName?.Replace("+", ".") ?? type.Name ?? "Schema");
+
+    options.OperationFilter<ExportImportOperationFilter>();
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
