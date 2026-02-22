@@ -238,4 +238,39 @@ public sealed class UsersController : ControllerBase
 
         return Ok(new { message = "User disabled." });
     }
+
+    [HttpPatch("{id:guid}/enable")]
+    public async Task<ActionResult> Enable(Guid id)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null) return NotFound();
+
+        user.IsDisabled = false;
+        await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.SetLockoutEnabledAsync(user, false);
+        await _userManager.UpdateAsync(user);
+
+        await _logs.LogAsync(User.GetUserId(), "AdminEnabledUser", $"UserId={id}");
+
+        return Ok(new { message = "User enabled." });
+    }
+
+    [HttpDelete("{id:guid}/permanently")]
+    public async Task<ActionResult> DeletePermanently(Guid id)
+    {
+        var callerId = User.GetUserId();
+        if (callerId == id)
+            return BadRequest(new { error = "You cannot delete your own account." });
+
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null) return NotFound();
+
+        await _logs.LogAsync(callerId, "AdminDeletedUser", $"UserId={id};Email={user.Email}");
+
+        var result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+            return BadRequest(new { error = string.Join("; ", result.Errors.Select(e => e.Description)) });
+
+        return Ok(new { message = "User permanently deleted." });
+    }
 }
