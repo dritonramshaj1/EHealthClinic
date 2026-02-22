@@ -12,6 +12,7 @@ import ExportDropdown from '../../components/ui/ExportDropdown.jsx'
 import { invoicesApi } from '../../api/services/invoicesApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -23,6 +24,7 @@ const defaultItem = () => ({ description: '', quantity: 1, unitPrice: 0 })
 export default function InvoicesPage() {
   const navigate = useNavigate()
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
@@ -103,8 +105,8 @@ export default function InvoicesPage() {
   return (
     <>
       <PageHeader
-        title="Invoices"
-        subtitle="Billing and payments"
+        title={t('pages.invoices.title')}
+        subtitle={t('pages.invoices.subtitle')}
         actions={
           <div className="d-flex gap-2 align-items-center flex-wrap">
             {hasPermission('billing.read') && (

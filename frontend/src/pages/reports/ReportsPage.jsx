@@ -2,13 +2,15 @@ import { Link } from 'react-router-dom'
 import PageHeader from '../../components/layout/PageHeader.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 export default function ReportsPage() {
   const { hasPermission } = useAuth()
+  const { t } = useLang()
 
   return (
     <>
-      <PageHeader title="Reports" subtitle="Analytics and exports" />
+      <PageHeader title={t('pages.reports.title')} subtitle={t('pages.reports.subtitle')} />
       <div className="content-block">
         <Card>
           <CardBody>

@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext.jsx'
+import { useLang } from '../state/LanguageContext.jsx'
 
 export default function RegisterPage() {
   const { register } = useAuth()
+  const { t } = useLang()
   const nav = useNavigate()
 
   const [fullName, setFullName] = useState('')
@@ -30,14 +32,16 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="auth-logo-icon">🏥</div>
-          <h1>Create account</h1>
-          <p>Register as a patient. Other roles are created by an administrator.</p>
+          <div className="auth-logo-icon">
+            <img src="/logo.png" alt="EHealthClinic" />
+          </div>
+          <h1>{t('auth.createAccount')}</h1>
+          <p>{t('auth.registerAsPatient')}</p>
         </div>
 
         <form onSubmit={onSubmit} className="form-stack">
           <div className="form-group">
-            <label className="form-label">Full name</label>
+            <label className="form-label">{t('auth.fullName')}</label>
             <input
               type="text"
               className="form-control"
@@ -50,7 +54,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('auth.email')}</label>
             <input
               type="email"
               className="form-control"
@@ -63,7 +67,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label">{t('auth.password')}</label>
             <input
               type="password"
               className="form-control"
@@ -79,11 +83,11 @@ export default function RegisterPage() {
           {error && <div className="alert alert-danger">{error}</div>}
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%' }}>
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
           </button>
 
           <p className="text-sm text-muted" style={{ textAlign: 'center', marginTop: 8 }}>
-            Already have an account? <Link to="/login">Sign in</Link>
+            {t('auth.haveAccount')} <Link to="/login">{t('auth.signIn')}</Link>
           </p>
         </form>
       </div>

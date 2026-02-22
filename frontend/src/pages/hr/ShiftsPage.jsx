@@ -11,6 +11,7 @@ import { hrApi } from '../../api/services/hrApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { branchesApi } from '../../api/services/branchesApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -19,6 +20,7 @@ function formatDate(d) {
 
 export default function ShiftsPage() {
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
@@ -82,8 +84,8 @@ export default function ShiftsPage() {
   return (
     <>
       <PageHeader
-        title="Shifts"
-        subtitle="Staff shift schedule"
+        title={t('pages.shifts.title')}
+        subtitle={t('pages.shifts.subtitle')}
         actions={
           hasPermission('hr.write') && (
             <Button variant="primary" onClick={() => setCreateOpen(true)}>New shift</Button>

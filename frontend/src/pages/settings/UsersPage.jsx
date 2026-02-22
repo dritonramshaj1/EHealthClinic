@@ -9,6 +9,7 @@ import Select from '../../components/ui/Select.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { usersApi } from '../../api/services/usersApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -27,6 +28,7 @@ const ROLE_OPTIONS = [
 
 export default function UsersPage() {
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [roles, setRoles] = useState([])
   const [loading, setLoading] = useState(true)
@@ -109,8 +111,8 @@ export default function UsersPage() {
   return (
     <>
       <PageHeader
-        title="Users"
-        subtitle="Manage accounts and roles"
+        title={t('pages.users.title')}
+        subtitle={t('pages.users.subtitle')}
         breadcrumb={[{ label: 'Settings', to: '/settings' }, { label: 'Users' }]}
         actions={
           hasPermission('users.write') && (

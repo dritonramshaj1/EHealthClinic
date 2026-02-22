@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/axios.js'
 import { useAuth } from '../state/AuthContext.jsx'
+import { useLang } from '../state/LanguageContext.jsx'
 import PageHeader from '../components/layout/PageHeader.jsx'
 import Button from '../components/ui/Button.jsx'
 import Spinner from '../components/ui/Spinner.jsx'
@@ -9,6 +10,7 @@ import { Card, CardHeader, CardBody } from '../components/ui/Card.jsx'
 
 export default function ProfilePage() {
   const { user } = useAuth()
+  const { t } = useLang()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -122,8 +124,8 @@ export default function ProfilePage() {
   return (
     <>
       <PageHeader
-        title="Profile"
-        subtitle={profile?.fullName || ''}
+        title={t('pages.profile.title')}
+        subtitle={t('pages.profile.subtitle')}
         actions={<Link to="/dashboard" className="btn btn-secondary">Back to Dashboard</Link>}
       />
 

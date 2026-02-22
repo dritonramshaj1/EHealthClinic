@@ -8,8 +8,9 @@ import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { messagesApi } from '../../api/services/messagesApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
-// Kush mund t’i dërgojë mesazhe kujt (sipas rolit). Patient vetëm doktorëve; të tjerët me messages.write → doktorë + pacientë.
+// Kush mund t'i dërgojë mesazhe kujt (sipas rolit). Patient vetëm doktorëve; të tjerët me messages.write → doktorë + pacientë.
 const RECIPIENT_BY_ROLE = {
   Patient: 'doctors',
   Doctor: 'doctors_and_patients',
@@ -27,6 +28,7 @@ function formatDate(d) {
 
 export default function MessagesPage() {
   const { user, hasPermission, primaryRole } = useAuth()
+  const { t } = useLang()
   const [tab, setTab] = useState('inbox')
   const [inbox, setInbox] = useState([])
   const [sent, setSent] = useState([])
@@ -135,8 +137,8 @@ export default function MessagesPage() {
   return (
     <>
       <PageHeader
-        title="Messages"
-        subtitle="Internal messaging"
+        title={t('pages.messages.title')}
+        subtitle={t('pages.messages.subtitle')}
         actions={
           hasPermission('messages.write') && (
             <Button variant="primary" onClick={() => setComposeOpen(true)}>New message</Button>

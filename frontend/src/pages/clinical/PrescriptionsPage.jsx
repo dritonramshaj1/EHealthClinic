@@ -11,6 +11,7 @@ import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { prescriptionsApi } from '../../api/services/prescriptionsApi.js'
 import { appointmentsApi } from '../../api/services/appointmentsApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -22,6 +23,7 @@ const defaultItem = () => ({ medicationName: '', dosage: '', frequency: '', dura
 export default function PrescriptionsPage() {
   const navigate = useNavigate()
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
@@ -119,8 +121,8 @@ export default function PrescriptionsPage() {
   return (
     <>
       <PageHeader
-        title="Prescriptions"
-        subtitle="View and manage prescriptions"
+        title={t('pages.prescriptions.title')}
+        subtitle={t('pages.prescriptions.subtitle')}
         actions={
           hasPermission('prescriptions.write') && (
             <Button variant="primary" onClick={() => setCreateOpen(true)}>New prescription</Button>

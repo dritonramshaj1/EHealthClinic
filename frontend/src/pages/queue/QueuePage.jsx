@@ -11,12 +11,14 @@ import { branchesApi } from '../../api/services/branchesApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { useUI } from '../../state/UIContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 const POLL_MS = 30000
 
 export default function QueuePage() {
   const { hasPermission } = useAuth()
   const { activeBranchId } = useUI()
+  const { t } = useLang()
   const [branches, setBranches] = useState([])
   const [branchId, setBranchId] = useState(activeBranchId || '')
   const [entries, setEntries] = useState([])
@@ -93,8 +95,8 @@ export default function QueuePage() {
   return (
     <>
       <PageHeader
-        title="Queue"
-        subtitle="Live queue board — refreshes every 30s"
+        title={t('pages.queue.title')}
+        subtitle={t('pages.queue.subtitle')}
         actions={
           <>
             <select

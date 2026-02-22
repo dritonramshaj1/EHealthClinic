@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext.jsx'
+import { useLang } from '../state/LanguageContext.jsx'
 
 export default function LoginPage() {
   const { login } = useAuth()
+  const { t } = useLang()
   const nav = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,14 +30,16 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="auth-logo-icon">🏥</div>
+          <div className="auth-logo-icon">
+            <img src="/logo.png" alt="EHealthClinic" />
+          </div>
           <h1>EHealth Clinic</h1>
-          <p>Sign in to your account</p>
+          <p>{t('auth.signInToAccount')}</p>
         </div>
 
         <form onSubmit={onSubmit} className="form-stack">
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('auth.email')}</label>
             <input
               type="email"
               className="form-control"
@@ -48,7 +52,7 @@ export default function LoginPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Password</label>
+            <label className="form-label">{t('auth.password')}</label>
             <input
               type="password"
               className="form-control"
@@ -63,11 +67,11 @@ export default function LoginPage() {
           {error && <div className="alert alert-danger">{error}</div>}
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%' }}>
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? t('auth.signingIn') : t('auth.signIn')}
           </button>
 
           <p className="text-sm text-muted" style={{ textAlign: 'center', marginTop: 8 }}>
-            Don't have an account? <Link to="/register">Register</Link>
+            {t('auth.noAccount')} <Link to="/register">{t('auth.register')}</Link>
           </p>
         </form>
       </div>

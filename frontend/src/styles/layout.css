@@ -54,15 +54,20 @@
 .sidebar-logo-icon {
   width: 36px;
   height: 36px;
-  background: var(--color-primary);
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
   flex-shrink: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+.sidebar-logo-icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
 }
 
 .sidebar-logo-text {
@@ -323,13 +328,18 @@
   padding: var(--page-padding);
 }
 
+/* ── Content Block — wraps page body content ── */
+.content-block {
+  width: 100%;
+}
+
 /* ── Page Header ── */
 .page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
   flex-wrap: wrap;
 }
 

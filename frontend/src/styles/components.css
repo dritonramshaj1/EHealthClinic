@@ -135,24 +135,25 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
-  padding: var(--space-5) var(--space-6);
+  padding: var(--space-4) var(--space-5);
   box-shadow: var(--shadow-sm);
 }
 
 .stat-card-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 }
 
 .stat-card-icon {
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  flex-shrink: 0;
 }
 
 .stat-card-icon.primary { background: var(--color-primary-subtle); color: var(--color-primary); }
@@ -162,17 +163,18 @@
 .stat-card-icon.danger { background: var(--color-danger-subtle); color: var(--color-danger); }
 
 .stat-card-value {
-  font-size: var(--font-size-3xl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   line-height: 1;
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
 }
 
 .stat-card-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   margin-top: var(--space-1);
+  font-weight: var(--font-weight-medium);
 }
 
 .stat-card-change {
@@ -563,16 +565,22 @@ textarea.form-control {
 }
 
 .auth-logo-icon {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   margin: 0 auto var(--space-3);
-  background: var(--color-primary);
-  color: white;
-  border-radius: var(--radius-xl);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.auth-logo-icon img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 .auth-logo h1 {

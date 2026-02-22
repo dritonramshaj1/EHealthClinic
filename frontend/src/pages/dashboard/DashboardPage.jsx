@@ -4,6 +4,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import StatCard from '../../components/ui/StatCard.jsx'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 import { analyticsApi } from '../../api/services/analyticsApi.js'
 import { queueApi } from '../../api/services/queueApi.js'
 import { branchesApi } from '../../api/services/branchesApi.js'
@@ -45,6 +46,7 @@ function QuickLink({ to, icon, label, subtitle, variant = 'primary' }) {
 
 export default function DashboardPage() {
   const { user, primaryRole, hasPermission } = useAuth()
+  const { t } = useLang()
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState(null)
   const [queueStats, setQueueStats] = useState(null)
@@ -109,81 +111,86 @@ export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        title="Dashboard"
-        subtitle={primaryRole === 'Admin' ? 'Menaxhimi i klinikës' : primaryRole === 'Doctor' ? 'Takimet dhe puna juaj' : primaryRole === 'Patient' ? 'Shëndeti juaj' : `Mirë se vini, ${welcomeName}`}
+        title={t('dashboard.title')}
+        subtitle={
+          primaryRole === 'Admin'   ? t('dashboard.subtitleAdmin') :
+          primaryRole === 'Doctor'  ? t('dashboard.subtitleDoctor') :
+          primaryRole === 'Patient' ? t('dashboard.subtitlePatient') :
+          welcomeName
+        }
       />
 
       <div className="content-block dashboard-page">
         {loading && (
-          <p className="text-secondary mb-4">Duke ngarkuar...</p>
+          <p className="text-secondary mb-4">{t('dashboard.loading')}</p>
         )}
 
         {/* ─── Admin ───────────────────────────────────────────────── */}
         {primaryRole === 'Admin' && (
           <>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Përmbledhje e shpejtë</h3>
-              <div className="d-grid grid-auto-fit-280 gap-4 mb-4">
+              <h3 className="dashboard-section-title">{t('dashboard.quickSummary')}</h3>
+              <div className="stat-grid mb-3">
                 {analytics?.summary && (
                   <>
                     <Link to="/appointments" style={{ textDecoration: 'none' }}>
-                      <StatCard title="Takime (gjithsej)" value={analytics.summary.total} icon="📅" variant="primary" />
+                      <StatCard title={t('dashboard.totalAppointments')} value={analytics.summary.total} icon="📅" variant="primary" />
                     </Link>
                     <Link to="/appointments?status=Scheduled" style={{ textDecoration: 'none' }}>
-                      <StatCard title="Të planifikuara" value={analytics.summary.scheduled} icon="⏳" variant="teal" />
+                      <StatCard title={t('dashboard.scheduled')} value={analytics.summary.scheduled} icon="⏳" variant="teal" />
                     </Link>
                     <Link to="/appointments?status=Completed" style={{ textDecoration: 'none' }}>
-                      <StatCard title="Të përfunduara" value={analytics.summary.completed} icon="✅" variant="success" />
+                      <StatCard title={t('dashboard.completed')} value={analytics.summary.completed} icon="✅" variant="success" />
                     </Link>
-                    <StatCard title="Të anuluara" value={analytics.summary.cancelled} icon="🚫" variant="danger" />
+                    <StatCard title={t('dashboard.cancelled')} value={analytics.summary.cancelled} icon="🚫" variant="danger" />
                   </>
                 )}
                 {queueStats != null && hasPermission('queue.read') && (
                   <Link to="/queue" style={{ textDecoration: 'none' }}>
-                    <StatCard title="Radha sot (në pritje)" value={queueStats.waiting ?? 0} icon="🔢" variant="warning" />
+                    <StatCard title={t('dashboard.queueToday')} value={queueStats.waiting ?? 0} icon="🔢" variant="warning" />
                   </Link>
                 )}
                 {hasPermission('messages.read') && (
                   <Link to="/messages" style={{ textDecoration: 'none' }}>
-                    <StatCard title="Mesazhe të palexuara" value={unreadMessages} icon="✉️" variant="teal" />
+                    <StatCard title={t('dashboard.unreadMessages')} value={unreadMessages} icon="✉️" variant="teal" />
                   </Link>
                 )}
               </div>
             </section>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Shkurtesat</h3>
+              <h3 className="dashboard-section-title">{t('dashboard.shortcuts')}</h3>
               <div className="dashboard-quick-grid">
-                <QuickLink to="/appointments" icon="📅" label="Takime" subtitle="Të gjitha takimet" variant="primary" />
-                <QuickLink to="/queue" icon="🔢" label="Radha" subtitle="Menaxho radhën" variant="teal" />
-                <QuickLink to="/patients" icon="👥" label="Pacientët" subtitle="Regjistri" variant="success" />
-                <QuickLink to="/billing/invoices" icon="🧾" label="Faturat" subtitle="Billing" variant="warning" />
-                <QuickLink to="/settings/users" icon="⚙️" label="Përdorues & role" subtitle="Konfigurim" variant="primary" />
-                <QuickLink to="/branches" icon="🏢" label="Degët" subtitle="Branches" variant="teal" />
-                <QuickLink to="/reports" icon="📊" label="Raportet" subtitle="Analitikë" variant="success" />
-                <QuickLink to="/messages" icon="✉️" label="Mesazhe" subtitle={unreadMessages ? `${unreadMessages} të palexuara` : 'Inbox'} variant="warning" />
+                <QuickLink to="/appointments" icon="📅" label={t('nav.appointments')} subtitle={t('dashboard.allAppointments')} variant="primary" />
+                <QuickLink to="/queue" icon="🔢" label={t('nav.queue')} subtitle={t('dashboard.manageQueue')} variant="teal" />
+                <QuickLink to="/patients" icon="👥" label={t('nav.patients')} subtitle={t('dashboard.patientRegistry')} variant="success" />
+                <QuickLink to="/billing/invoices" icon="🧾" label={t('nav.invoices')} subtitle={t('dashboard.billing')} variant="warning" />
+                <QuickLink to="/settings/users" icon="⚙️" label={t('dashboard.usersAndRoles')} subtitle={t('dashboard.configure')} variant="primary" />
+                <QuickLink to="/branches" icon="🏢" label={t('nav.branches')} subtitle={t('nav.branches')} variant="teal" />
+                <QuickLink to="/reports" icon="📊" label={t('nav.reports')} subtitle={t('dashboard.analytics')} variant="success" />
+                <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.inbox')} variant="warning" />
               </div>
             </section>
             {analytics && (
               <section className="dashboard-section">
-                <h3 className="dashboard-section-title">Statistika & grafikë</h3>
+                <h3 className="dashboard-section-title">{t('dashboard.statsAndCharts')}</h3>
                 <div className="dashboard-charts-grid">
-                  <Card><CardBody><h4 className="chart-card-title">Takime sipas statusit</h4><StatusPieChart data={analytics.statusDistribution} /></CardBody></Card>
-                  <Card><CardBody><h4 className="chart-card-title">Trendi mujor (12 muaj)</h4><MonthlyTrendChart data={analytics.monthlyData} /></CardBody></Card>
+                  <Card><CardBody><h4 className="chart-card-title">{t('dashboard.appointmentsByStatus')}</h4><StatusPieChart data={analytics.statusDistribution} /></CardBody></Card>
+                  <Card><CardBody><h4 className="chart-card-title">{t('dashboard.monthlyTrend')}</h4><MonthlyTrendChart data={analytics.monthlyData} /></CardBody></Card>
                   {analytics.perDoctor?.length > 0 && (
-                    <Card className="chart-span-2"><CardBody><h4 className="chart-card-title">Takime sipas doktorit</h4><PerDoctorBarChart data={analytics.perDoctor} /></CardBody></Card>
+                    <Card><CardBody><h4 className="chart-card-title">{t('dashboard.appointmentsByDoctor')}</h4><PerDoctorBarChart data={analytics.perDoctor} /></CardBody></Card>
                   )}
-                  <Card><CardBody><h4 className="chart-card-title">Specialitetet më të kërkuara</h4><SpecialtiesBarChart data={analytics.topSpecialties} /></CardBody></Card>
+                  <Card><CardBody><h4 className="chart-card-title">{t('dashboard.topSpecialties')}</h4><SpecialtiesBarChart data={analytics.topSpecialties} /></CardBody></Card>
                 </div>
               </section>
             )}
             <section className="dashboard-section dashboard-widgets-row">
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Kalendar</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Takime të ardhshme</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Shënime</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.calendar')}</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.upcomingAppointments')}</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.notes')}</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
             </section>
             <Card className="dashboard-tip">
               <CardBody>
-                <strong>Këshillë:</strong> Përdorni Raportet për të parë takimet sipas doktorëve dhe muajve. Radha dhe takimet mund të menaxhohen nga menyja.
+                <strong>{t('dashboard.tip')}:</strong> {t('dashboard.tipAdmin')}
               </CardBody>
             </Card>
           </>
@@ -193,51 +200,51 @@ export default function DashboardPage() {
         {primaryRole === 'Doctor' && (
           <>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Sot</h3>
-              <div className="d-grid grid-auto-fit-280 gap-4 mb-4">
+              <h3 className="dashboard-section-title">{t('dashboard.today')}</h3>
+              <div className="stat-grid mb-3">
                 <Link to="/appointments" style={{ textDecoration: 'none' }}>
-                  <StatCard title="Takimet e mia sot" value={todayAppointments ?? '—'} icon="📅" variant="primary" />
+                  <StatCard title={t('dashboard.myAppointmentsToday')} value={todayAppointments ?? '—'} icon="📅" variant="primary" />
                 </Link>
                 {analytics?.summary && (
                   <Link to="/appointments?status=Scheduled" style={{ textDecoration: 'none' }}>
-                    <StatCard title="Të planifikuara" value={analytics.summary.scheduled} icon="⏳" variant="teal" />
+                    <StatCard title={t('dashboard.scheduled')} value={analytics.summary.scheduled} icon="⏳" variant="teal" />
                   </Link>
                 )}
                 <Link to="/messages" style={{ textDecoration: 'none' }}>
-                  <StatCard title="Mesazhe të palexuara" value={unreadMessages} icon="✉️" variant="warning" />
+                  <StatCard title={t('dashboard.unreadMessages')} value={unreadMessages} icon="✉️" variant="warning" />
                 </Link>
               </div>
             </section>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Shkurtesat</h3>
+              <h3 className="dashboard-section-title">{t('dashboard.shortcuts')}</h3>
               <div className="dashboard-quick-grid">
-                <QuickLink to="/appointments" icon="📅" label="Takimet e mia" subtitle="Kalendari" variant="primary" />
-                <QuickLink to="/clinical/prescriptions" icon="💊" label="Recetat" subtitle="Prescriptions" variant="teal" />
-                <QuickLink to="/laboratory" icon="🧪" label="Porositë lab" subtitle="Rezultatet" variant="success" />
-                <QuickLink to="/messages" icon="✉️" label="Mesazhe" subtitle={unreadMessages ? `${unreadMessages} të palexuara` : 'Inbox'} variant="warning" />
-                <QuickLink to="/hr/leave" icon="🏖️" label="Leje" subtitle="Kërko leje" variant="primary" />
+                <QuickLink to="/appointments" icon="📅" label={t('nav.appointments')} subtitle={t('dashboard.myCalendar')} variant="primary" />
+                <QuickLink to="/clinical/prescriptions" icon="💊" label={t('nav.prescriptions')} subtitle={t('dashboard.myPrescriptions')} variant="teal" />
+                <QuickLink to="/laboratory" icon="🧪" label={t('dashboard.labOrders')} subtitle={t('nav.laboratory')} variant="success" />
+                <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.inbox')} variant="warning" />
+                <QuickLink to="/hr/leave" icon="🏖️" label={t('nav.leaveRequests')} subtitle={t('dashboard.requestLeave')} variant="primary" />
               </div>
             </section>
             {analytics && (analytics.statusDistribution?.length > 0 || analytics.monthlyData?.length > 0) && (
               <section className="dashboard-section">
-                <h3 className="dashboard-section-title">Statistika</h3>
+                <h3 className="dashboard-section-title">{t('dashboard.statsAndCharts')}</h3>
                 <div className="dashboard-charts-grid dashboard-charts-grid-sm">
-                  <Card><CardBody><h4 className="chart-card-title">Takime sipas statusit</h4><StatusPieChart data={analytics.statusDistribution} /></CardBody></Card>
-                  <Card><CardBody><h4 className="chart-card-title">Trendi mujor</h4><MonthlyTrendChart data={analytics.monthlyData} /></CardBody></Card>
+                  <Card><CardBody><h4 className="chart-card-title">{t('dashboard.appointmentsByStatus')}</h4><StatusPieChart data={analytics.statusDistribution} /></CardBody></Card>
+                  <Card><CardBody><h4 className="chart-card-title">{t('dashboard.monthlyTrend')}</h4><MonthlyTrendChart data={analytics.monthlyData} /></CardBody></Card>
                   {analytics.topSpecialties?.length > 0 && (
-                    <Card><CardBody><h4 className="chart-card-title">Specialiteti</h4><SpecialtiesBarChart data={analytics.topSpecialties} /></CardBody></Card>
+                    <Card><CardBody><h4 className="chart-card-title">{t('dashboard.topSpecialties')}</h4><SpecialtiesBarChart data={analytics.topSpecialties} /></CardBody></Card>
                   )}
                 </div>
               </section>
             )}
             <section className="dashboard-section dashboard-widgets-row">
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Kalendar</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Takime të ardhshme</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Shënime</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.calendar')}</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.upcomingAppointments')}</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.notes')}</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
             </section>
             <Card className="dashboard-tip">
               <CardBody>
-                <strong>Këshillë:</strong> Kontrolloni takimet e sotme dhe mesazhet e reja që të mos mungojë asgjë.
+                <strong>{t('dashboard.tip')}:</strong> {t('dashboard.tipDoctor')}
               </CardBody>
             </Card>
           </>
@@ -247,33 +254,33 @@ export default function DashboardPage() {
         {primaryRole === 'Patient' && (
           <>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Sot</h3>
-              <div className="d-grid grid-auto-fit-280 gap-4 mb-4">
+              <h3 className="dashboard-section-title">{t('dashboard.today')}</h3>
+              <div className="stat-grid mb-3">
                 <Link to="/appointments" style={{ textDecoration: 'none' }}>
-                  <StatCard title="Takimet e mia sot" value={todayAppointments ?? '—'} icon="📅" variant="primary" />
+                  <StatCard title={t('dashboard.myAppointmentsToday')} value={todayAppointments ?? '—'} icon="📅" variant="primary" />
                 </Link>
                 <Link to="/messages" style={{ textDecoration: 'none' }}>
-                  <StatCard title="Mesazhe të palexuara" value={unreadMessages} icon="✉️" variant="teal" />
+                  <StatCard title={t('dashboard.unreadMessages')} value={unreadMessages} icon="✉️" variant="teal" />
                 </Link>
               </div>
             </section>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Shëndeti im</h3>
+              <h3 className="dashboard-section-title">{t('dashboard.healthSection')}</h3>
               <div className="dashboard-quick-grid">
-                <QuickLink to="/appointments" icon="📅" label="Takimet" subtitle="Rezervo ose shiko" variant="primary" />
-                <QuickLink to="/clinical/prescriptions" icon="💊" label="Recetat" subtitle="Të miat" variant="teal" />
-                <QuickLink to="/messages" icon="✉️" label="Mesazhe" subtitle={unreadMessages ? `${unreadMessages} të palexuara` : 'Dërgo mesazh'} variant="success" />
-                <QuickLink to="/billing/invoices" icon="🧾" label="Faturat" subtitle="Billing" variant="warning" />
+                <QuickLink to="/appointments" icon="📅" label={t('nav.appointments')} subtitle={t('dashboard.bookOrView')} variant="primary" />
+                <QuickLink to="/clinical/prescriptions" icon="💊" label={t('nav.prescriptions')} subtitle={t('dashboard.myPrescriptions')} variant="teal" />
+                <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.sendMessage')} variant="success" />
+                <QuickLink to="/billing/invoices" icon="🧾" label={t('nav.invoices')} subtitle={t('dashboard.billing')} variant="warning" />
               </div>
             </section>
             <section className="dashboard-section dashboard-widgets-row">
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Kalendar</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Takime të ardhshme</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Shënime</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.calendar')}</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.upcomingAppointments')}</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.notes')}</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
             </section>
             <Card className="dashboard-tip">
               <CardBody>
-                <strong>Këshillë:</strong> Përdorni Mesazhet për të komunikuar me mjekun tuaj. Faturat mund të shihen te Billing.
+                <strong>{t('dashboard.tip')}:</strong> {t('dashboard.tipPatient')}
               </CardBody>
             </Card>
           </>
@@ -283,40 +290,40 @@ export default function DashboardPage() {
         {primaryRole === 'Receptionist' && (
           <>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Radha dhe takimet</h3>
-              <div className="d-grid grid-auto-fit-280 gap-4 mb-4">
+              <h3 className="dashboard-section-title">{t('dashboard.queueAndAppointments')}</h3>
+              <div className="stat-grid mb-3">
                 {queueStats != null && (
                   <>
                     <Link to="/queue" style={{ textDecoration: 'none' }}>
-                      <StatCard title="Në pritje" value={queueStats.waiting ?? 0} icon="⏳" variant="primary" />
+                      <StatCard title={t('dashboard.waiting')} value={queueStats.waiting ?? 0} icon="⏳" variant="primary" />
                     </Link>
-                    <StatCard title="Në progres" value={queueStats.inProgress ?? 0} icon="🔄" variant="teal" />
-                    <StatCard title="Përfunduar sot" value={queueStats.done ?? 0} icon="✅" variant="success" />
+                    <StatCard title={t('dashboard.inProgress')} value={queueStats.inProgress ?? 0} icon="🔄" variant="teal" />
+                    <StatCard title={t('dashboard.doneToday')} value={queueStats.done ?? 0} icon="✅" variant="success" />
                   </>
                 )}
                 <Link to="/appointments" style={{ textDecoration: 'none' }}>
-                  <StatCard title="Takime sot" value={todayAppointments ?? '—'} icon="📅" variant="warning" />
+                  <StatCard title={t('dashboard.appointmentsToday')} value={todayAppointments ?? '—'} icon="📅" variant="warning" />
                 </Link>
               </div>
             </section>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Shkurtesat</h3>
+              <h3 className="dashboard-section-title">{t('dashboard.shortcuts')}</h3>
               <div className="dashboard-quick-grid">
-                <QuickLink to="/queue" icon="🔢" label="Radha" subtitle="Menaxho radhën" variant="primary" />
-                <QuickLink to="/appointments" icon="📅" label="Takime" subtitle="Rezervime" variant="teal" />
-                <QuickLink to="/patients" icon="👥" label="Pacientët" subtitle="Regjistri" variant="success" />
-                <QuickLink to="/billing/invoices" icon="🧾" label="Faturat" subtitle="Billing" variant="warning" />
-                <QuickLink to="/messages" icon="✉️" label="Mesazhe" subtitle={unreadMessages ? `${unreadMessages} të palexuara` : 'Inbox'} variant="primary" />
+                <QuickLink to="/queue" icon="🔢" label={t('nav.queue')} subtitle={t('dashboard.manageQueue')} variant="primary" />
+                <QuickLink to="/appointments" icon="📅" label={t('nav.appointments')} subtitle={t('dashboard.reservations')} variant="teal" />
+                <QuickLink to="/patients" icon="👥" label={t('nav.patients')} subtitle={t('dashboard.patientRegistry')} variant="success" />
+                <QuickLink to="/billing/invoices" icon="🧾" label={t('nav.invoices')} subtitle={t('dashboard.billing')} variant="warning" />
+                <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.inbox')} variant="primary" />
               </div>
             </section>
             <section className="dashboard-section dashboard-widgets-row">
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Kalendar</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Takime të ardhshme</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
-              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">Shënime</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.calendar')}</h4><MiniCalendar appointmentsByDate={appointmentsByDate} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.upcomingAppointments')}</h4><UpcomingAppointments list={upcomingAppointments} /></CardBody></Card>
+              <Card className="dashboard-widget"><CardBody><h4 className="widget-title">{t('dashboard.notes')}</h4><DashboardNotes userId={user?.id} /></CardBody></Card>
             </section>
             <Card className="dashboard-tip">
               <CardBody>
-                <strong>Këshillë:</strong> Mbajeni radhën e përditësuar dhe shtoni pacientë në radhë kur mbërrijnë.
+                <strong>{t('dashboard.tip')}:</strong> {t('dashboard.tipReceptionist')}
               </CardBody>
             </Card>
           </>
@@ -326,19 +333,19 @@ export default function DashboardPage() {
         {primaryRole === 'LabTechnician' && (
           <>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Laboratori</h3>
+              <h3 className="dashboard-section-title">{t('dashboard.labSection')}</h3>
               <div className="dashboard-quick-grid">
-                <QuickLink to="/laboratory" icon="🧪" label="Porositë lab" subtitle="Porositë dhe rezultatet" variant="primary" />
-                <QuickLink to="/documents" icon="📄" label="Dokumentet" subtitle="Skanime" variant="teal" />
-                <QuickLink to="/messages" icon="✉️" label="Mesazhe" subtitle={unreadMessages ? `${unreadMessages} të palexuara` : 'Inbox'} variant="success" />
+                <QuickLink to="/laboratory" icon="🧪" label={t('dashboard.labOrders')} subtitle={t('pages.laboratory.subtitle')} variant="primary" />
+                <QuickLink to="/documents" icon="📄" label={t('nav.documents')} subtitle={t('nav.documents')} variant="teal" />
+                <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.inbox')} variant="success" />
               </div>
             </section>
             <Card className="dashboard-widget" style={{ maxWidth: 360 }}>
-              <CardBody><h4 className="widget-title">Shënime</h4><DashboardNotes userId={user?.id} /></CardBody>
+              <CardBody><h4 className="widget-title">{t('dashboard.notes')}</h4><DashboardNotes userId={user?.id} /></CardBody>
             </Card>
             <Card className="dashboard-tip">
               <CardBody>
-                <strong>Këshillë:</strong> Regjistroni rezultatet e testeve te Laboratori për t’i bërë të dukshme për mjekun.
+                <strong>{t('dashboard.tip')}:</strong> {t('dashboard.tipLab')}
               </CardBody>
             </Card>
           </>
@@ -348,19 +355,19 @@ export default function DashboardPage() {
         {primaryRole === 'Pharmacist' && (
           <>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">Farmaci & inventar</h3>
+              <h3 className="dashboard-section-title">{t('dashboard.pharmacySection')}</h3>
               <div className="dashboard-quick-grid">
-                <QuickLink to="/clinical/prescriptions" icon="💊" label="Recetat" subtitle="Të arkëtueshme" variant="primary" />
-                <QuickLink to="/inventory" icon="📦" label="Inventari" subtitle="Stoku" variant="teal" />
-                <QuickLink to="/messages" icon="✉️" label="Mesazhe" subtitle={unreadMessages ? `${unreadMessages} të palexuara` : 'Inbox'} variant="success" />
+                <QuickLink to="/clinical/prescriptions" icon="💊" label={t('nav.prescriptions')} subtitle={t('dashboard.dispensable')} variant="primary" />
+                <QuickLink to="/inventory" icon="📦" label={t('nav.inventory')} subtitle={t('dashboard.stockLevel')} variant="teal" />
+                <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.inbox')} variant="success" />
               </div>
             </section>
             <Card className="dashboard-widget" style={{ maxWidth: 360 }}>
-              <CardBody><h4 className="widget-title">Shënime</h4><DashboardNotes userId={user?.id} /></CardBody>
+              <CardBody><h4 className="widget-title">{t('dashboard.notes')}</h4><DashboardNotes userId={user?.id} /></CardBody>
             </Card>
             <Card className="dashboard-tip">
               <CardBody>
-                <strong>Këshillë:</strong> Kontrolloni inventarin dhe plotësoni recetat nga lista e recetave.
+                <strong>{t('dashboard.tip')}:</strong> {t('dashboard.tipPharmacist')}
               </CardBody>
             </Card>
           </>
@@ -370,21 +377,21 @@ export default function DashboardPage() {
         {primaryRole === 'HRManager' && (
           <>
             <section className="dashboard-section">
-              <h3 className="dashboard-section-title">HR & raporte</h3>
+              <h3 className="dashboard-section-title">{t('dashboard.hrSection')}</h3>
               <div className="dashboard-quick-grid">
-                <QuickLink to="/hr/shifts" icon="🕐" label="Turnet" subtitle="Orari" variant="primary" />
-                <QuickLink to="/hr/leave" icon="🏖️" label="Kërkesat e lejes" subtitle="Aprovo / refuzo" variant="teal" />
-                <QuickLink to="/settings/users" icon="👥" label="Përdoruesit" subtitle="Lista" variant="success" />
-                <QuickLink to="/reports" icon="📊" label="Raportet" subtitle="Analitikë" variant="warning" />
-                <QuickLink to="/messages" icon="✉️" label="Mesazhe" subtitle={unreadMessages ? `${unreadMessages} të palexuara` : 'Inbox'} variant="primary" />
+                <QuickLink to="/hr/shifts" icon="🕐" label={t('nav.shifts')} subtitle={t('dashboard.roster')} variant="primary" />
+                <QuickLink to="/hr/leave" icon="🏖️" label={t('nav.leaveRequests')} subtitle={t('dashboard.approveReject')} variant="teal" />
+                <QuickLink to="/settings/users" icon="👥" label={t('dashboard.usersAndRoles')} subtitle={t('dashboard.userList')} variant="success" />
+                <QuickLink to="/reports" icon="📊" label={t('nav.reports')} subtitle={t('dashboard.analytics')} variant="warning" />
+                <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.inbox')} variant="primary" />
               </div>
             </section>
             <Card className="dashboard-widget" style={{ maxWidth: 360 }}>
-              <CardBody><h4 className="widget-title">Shënime</h4><DashboardNotes userId={user?.id} /></CardBody>
+              <CardBody><h4 className="widget-title">{t('dashboard.notes')}</h4><DashboardNotes userId={user?.id} /></CardBody>
             </Card>
             <Card className="dashboard-tip">
               <CardBody>
-                <strong>Këshillë:</strong> Menaxhoni turnet dhe kërkesat e lejes nga seksioni HR.
+                <strong>{t('dashboard.tip')}:</strong> {t('dashboard.tipHR')}
               </CardBody>
             </Card>
           </>
@@ -394,32 +401,40 @@ export default function DashboardPage() {
         {!['Admin', 'Doctor', 'Patient', 'Receptionist', 'LabTechnician', 'Pharmacist', 'HRManager'].includes(primaryRole) && (
           <Card>
             <CardBody>
-              <h4 className="mb-2">Dashboard</h4>
-              <p className="text-secondary mb-0">Përdorni menyën anësore për të hyrë në modulet e disponueshme për rolin tuaj.</p>
+              <h4 className="mb-2">{t('dashboard.title')}</h4>
+              <p className="text-secondary mb-0">{t('dashboard.fallback')}</p>
             </CardBody>
           </Card>
         )}
       </div>
 
       <style>{`
-        .dashboard-page { max-width: 1200px; }
-        .dashboard-section { margin-bottom: var(--space-8, 2rem); }
+        .dashboard-page { max-width: none; width: 100%; }
+        .dashboard-section { margin-bottom: var(--space-6); }
         .dashboard-section-title {
-          font-size: var(--font-size-lg);
+          font-size: var(--font-size-base);
           font-weight: var(--font-weight-semibold);
-          color: var(--text-primary);
-          margin-bottom: var(--space-4);
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-size: 0.7rem;
+          margin-bottom: var(--space-3);
+        }
+        .stat-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: var(--space-3);
         }
         .dashboard-quick-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
           gap: var(--space-3);
         }
         .dashboard-quick-link {
           display: flex;
           align-items: center;
           gap: var(--space-3);
-          padding: var(--space-4);
+          padding: var(--space-3) var(--space-4);
           background: var(--bg-surface);
           border: 1px solid var(--border-color);
           border-radius: var(--radius-lg);
@@ -430,29 +445,35 @@ export default function DashboardPage() {
           box-shadow: var(--shadow-sm);
         }
         .dashboard-quick-link-icon {
-          width: 44px;
-          height: 44px;
+          width: 36px;
+          height: 36px;
           border-radius: var(--radius-md);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.25rem;
+          font-size: 1.1rem;
+          flex-shrink: 0;
         }
         .dashboard-quick-link-icon.primary { background: var(--color-primary-subtle); color: var(--color-primary); }
         .dashboard-quick-link-icon.teal { background: var(--color-teal-subtle); color: var(--color-teal); }
         .dashboard-quick-link-icon.success { background: var(--color-success-subtle); color: var(--color-success); }
         .dashboard-quick-link-icon.warning { background: var(--color-warning-subtle); color: var(--color-warning); }
-        .dashboard-quick-link-text { display: flex; flex-direction: column; gap: 2px; }
-        .dashboard-quick-link-label { font-weight: 600; color: var(--text-primary); }
-        .dashboard-quick-link-sub { font-size: var(--font-size-xs); color: var(--text-secondary); }
-        .dashboard-tip { background: var(--color-primary-subtle); border-color: var(--color-primary); }
+        .dashboard-quick-link-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+        .dashboard-quick-link-label { font-weight: 600; color: var(--text-primary); font-size: var(--font-size-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dashboard-quick-link-sub { font-size: var(--font-size-xs); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dashboard-tip { background: var(--color-primary-subtle); border-color: var(--color-primary); font-size: var(--font-size-sm); }
         .dashboard-charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
         .dashboard-charts-grid .chart-card-title { font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-2); color: var(--text-primary); }
         .dashboard-charts-grid .chart-span-2 { grid-column: span 2; }
-        .dashboard-charts-grid-sm { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-        .dashboard-widgets-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-4); }
+        .dashboard-charts-grid-sm { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+        .dashboard-widgets-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
         .dashboard-widgets-row .widget-title { font-size: var(--font-size-sm); font-weight: 600; margin-bottom: var(--space-3); color: var(--text-primary); }
-        @media (max-width: 768px) { .dashboard-charts-grid { grid-template-columns: 1fr; } .dashboard-charts-grid .chart-span-2 { grid-column: span 1; } }
+        @media (max-width: 1100px) { .dashboard-widgets-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+          .dashboard-charts-grid { grid-template-columns: 1fr; }
+          .dashboard-widgets-row { grid-template-columns: 1fr; }
+          .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        }
       `}</style>
     </>
   )

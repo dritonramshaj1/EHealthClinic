@@ -3,6 +3,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { usersApi } from '../../api/services/usersApi.js'
 import { PermissionMatrix } from '../../state/PermissionMatrix.js'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 const ROLE_DESCRIPTIONS = {
   Admin: 'Full access to all modules and user/role management.',
@@ -15,6 +16,7 @@ const ROLE_DESCRIPTIONS = {
 }
 
 export default function RolesPage() {
+  const { t } = useLang()
   const [roles, setRoles] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -28,8 +30,8 @@ export default function RolesPage() {
   return (
     <>
       <PageHeader
-        title="Roles"
-        subtitle="System roles and permissions (read-only)"
+        title={t('pages.users.title')}
+        subtitle={t('pages.users.subtitle')}
         breadcrumb={[{ label: 'Settings', to: '/settings' }, { label: 'Roles' }]}
       />
       <div className="content-block">

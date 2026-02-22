@@ -9,6 +9,7 @@ import Table from '../../components/ui/Table.jsx'
 import { documentsApi } from '../../api/services/documentsApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -24,6 +25,7 @@ function formatSize(bytes) {
 
 export default function DocumentsPage() {
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [patients, setPatients] = useState([])
   const [patientId, setPatientId] = useState('')
   const [list, setList] = useState([])
@@ -105,8 +107,8 @@ export default function DocumentsPage() {
   return (
     <>
       <PageHeader
-        title="Documents"
-        subtitle="Patient documents and uploads"
+        title={t('pages.documents.title')}
+        subtitle={t('pages.documents.subtitle')}
         actions={
           patientId && hasPermission('documents.write') && (
             <Button variant="primary" onClick={() => setUploadOpen(true)}>Upload</Button>
