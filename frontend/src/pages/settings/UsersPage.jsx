@@ -88,20 +88,61 @@ export default function UsersPage() {
     usersApi.disable(row.id).then(loadList).catch(() => {})
   }
 
+  const handleEnable = (row) => {
+    if (!confirm(`Enable user "${row.fullName}"? They will be able to sign in again.`)) return
+    usersApi.enable(row.id).then(loadList).catch(() => {})
+  }
+
+  const handleDeletePermanently = (row) => {
+    if (!confirm(`⚠️ WARNING: Permanently delete "${row.fullName}"?\n\nThis action cannot be undone. All account data will be removed.`)) return
+    if (!confirm(`Are you absolutely sure you want to permanently delete "${row.fullName}"?`)) return
+    usersApi.deletePermanently(row.id).then(loadList).catch(err => {
+      alert(err.response?.data?.error || 'Failed to delete user.')
+    })
+  }
+
   const columns = [
-    { key: 'fullName', header: 'Name' },
-    { key: 'email', header: 'Email' },
+    {
+      key: 'fullName',
+      header: 'Name',
+      render: row => (
+        <span style={row.isDisabled ? { color: 'var(--text-secondary)', textDecoration: 'line-through' } : {}}>
+          {row.fullName}
+        </span>
+      ),
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      render: row => (
+        <span style={row.isDisabled ? { color: 'var(--text-secondary)' } : {}}>
+          {row.email}
+        </span>
+      ),
+    },
     { key: 'roles', header: 'Roles', render: row => (Array.isArray(row.roles) ? row.roles.join(', ') : row.roles) },
     { key: 'createdAtUtc', header: 'Created', render: row => formatDate(row.createdAtUtc) },
     {
       key: 'actions',
       header: 'Actions',
       render: row => (
-        <>
-          {row.isDisabled ? <Badge variant="danger">Disabled</Badge> : hasPermission('users.write') && (
-            <Button variant="ghost" size="sm" className="text-danger" onClick={() => handleDisable(row)}>Disable</Button>
+        <div className="d-flex align-items-center gap-2">
+          {row.isDisabled ? (
+            <>
+              <Badge variant="danger">Disabled</Badge>
+              {hasPermission('users.write') && (
+                <Button variant="ghost" size="sm" onClick={() => handleEnable(row)}>Enable</Button>
+              )}
+            </>
+          ) : (
+            hasPermission('users.write') && (
+              <Button variant="ghost" size="sm" className="text-danger" onClick={() => handleDisable(row)}>Disable</Button>
+            )
           )}
-        </>
+          {hasPermission('users.write') && (
+            <Button variant="ghost" size="sm" style={{ color: 'var(--color-danger)', opacity: 0.7 }} onClick={() => handleDeletePermanently(row)}>🗑 Delete</Button>
+          )}
+        </div>
       ),
     },
   ]

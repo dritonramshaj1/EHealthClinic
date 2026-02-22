@@ -63,6 +63,9 @@ public sealed class AuthService : IAuthService
         var ok = await _userManager.CheckPasswordAsync(user, req.Password);
         if (!ok) throw new UnauthorizedAccessException("Invalid credentials.");
 
+        if (user.IsDisabled)
+            throw new UnauthorizedAccessException("Account is disabled. Please contact an administrator.");
+
         return await CreateAuthResponseAsync(user);
     }
 
@@ -74,6 +77,9 @@ public sealed class AuthService : IAuthService
 
         if (rt is null || !rt.IsActive)
             throw new UnauthorizedAccessException("Refresh token is invalid or expired.");
+
+        if (rt.User.IsDisabled)
+            throw new UnauthorizedAccessException("Account is disabled. Please contact an administrator.");
 
         // rotate refresh token
         rt.RevokedAtUtc = DateTime.UtcNow;
