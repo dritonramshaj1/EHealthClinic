@@ -58,12 +58,12 @@ export default function Sidebar() {
   return (
     <aside className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}`}>
       {/* Logo */}
-      <div className="sidebar-logo">
+      <NavLink to="/dashboard" className="sidebar-logo" style={{ textDecoration: 'none' }}>
         <div className="sidebar-logo-icon">
           <img src="/logo.png" alt="EHealthClinic" />
         </div>
         <span className="sidebar-logo-text">EHealthClinic</span>
-      </div>
+      </NavLink>
 
       {/* Navigation */}
       <nav className="sidebar-nav">
