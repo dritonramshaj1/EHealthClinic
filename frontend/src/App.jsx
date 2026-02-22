@@ -6,6 +6,7 @@ import PermissionRoute from './components/PermissionRoute.jsx'
 import Spinner from './components/ui/Spinner.jsx'
 
 // Public pages
+const LandingPage = lazy(() => import('./pages/LandingPage.jsx'))
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'))
 const Forbidden = lazy(() => import('./pages/Forbidden.jsx'))
@@ -49,7 +50,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage.jsx'))
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Suspense fallback={<Spinner center />}><LandingPage /></Suspense>} />
       <Route path="/login" element={<Suspense fallback={<Spinner center />}><LoginPage /></Suspense>} />
       <Route path="/register" element={<Suspense fallback={<Spinner center />}><RegisterPage /></Suspense>} />
       <Route path="/forbidden" element={<Suspense fallback={<Spinner center />}><Forbidden /></Suspense>} />
