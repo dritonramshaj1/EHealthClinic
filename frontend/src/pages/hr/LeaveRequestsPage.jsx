@@ -9,6 +9,7 @@ import Select from '../../components/ui/Select.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { hrApi } from '../../api/services/hrApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -17,6 +18,7 @@ function formatDate(d) {
 
 export default function LeaveRequestsPage() {
   const { user, hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
@@ -92,8 +94,8 @@ export default function LeaveRequestsPage() {
   return (
     <>
       <PageHeader
-        title="Leave requests"
-        subtitle="Time-off and approvals"
+        title={t('pages.leaveRequests.title')}
+        subtitle={t('pages.leaveRequests.subtitle')}
         actions={
           <Button variant="primary" onClick={() => setCreateOpen(true)}>Request leave</Button>
         }

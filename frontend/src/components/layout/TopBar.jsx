@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../state/AuthContext.jsx'
 import { useUI } from '../../state/UIContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 import { messagesApi } from '../../api/services/messagesApi.js'
 import { notificationsApi } from '../../api/services/notificationsApi.js'
 
@@ -20,6 +21,7 @@ function formatNotifDate(d) {
 export default function TopBar() {
   const { user, primaryRole, logout, hasPermission } = useAuth()
   const { toggleSidebar, darkMode, toggleDarkMode } = useUI()
+  const { lang, switchLang, t } = useLang()
   const navigate = useNavigate()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -82,7 +84,7 @@ export default function TopBar() {
         <input
           type="text"
           className="topbar-search-input"
-          placeholder="Search patients, appointments..."
+          placeholder={t('topbar.searchPlaceholder')}
         />
       </div>
 
@@ -105,13 +107,13 @@ export default function TopBar() {
             {notificationsOpen && (
               <div className="dropdown-menu dropdown-menu-notifications">
                 <div className="dropdown-header">
-                  <strong>Njoftimet</strong>
+                  <strong>{t('topbar.notifications')}</strong>
                   <Link to="/notifications" onClick={() => setNotificationsOpen(false)} className="dropdown-link-sm">
-                    Shiko të gjitha
+                    {t('topbar.viewAll')}
                   </Link>
                 </div>
                 {notifications.length === 0 ? (
-                  <div className="dropdown-item text-secondary text-sm">Nuk ka njoftime</div>
+                  <div className="dropdown-item text-secondary text-sm">{t('topbar.noNotifications')}</div>
                 ) : (
                   notifications.map(n => (
                     <Link
@@ -131,11 +133,21 @@ export default function TopBar() {
           </div>
         )}
 
+        {/* Language toggle */}
+        <button
+          className="topbar-icon-btn lang-toggle"
+          onClick={() => switchLang(lang === 'sq' ? 'en' : 'sq')}
+          title={lang === 'sq' ? 'Switch to English' : 'Kalo në Shqip'}
+          style={{ fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.05em', width: 'auto', padding: '0 10px', gap: 4 }}
+        >
+          {lang === 'sq' ? '🇦🇱 SQ' : '🇬🇧 EN'}
+        </button>
+
         {/* Dark mode */}
         <button
           className="topbar-icon-btn"
           onClick={toggleDarkMode}
-          title={darkMode ? 'Light mode' : 'Dark mode'}
+          title={darkMode ? t('topbar.lightMode') : t('topbar.darkMode')}
         >
           {darkMode ? '☀️' : '🌙'}
         </button>
@@ -167,14 +179,14 @@ export default function TopBar() {
           {dropdownOpen && (
             <div className="dropdown-menu">
               <Link className="dropdown-item" to="/profile" onClick={() => setDropdownOpen(false)}>
-                <span>👤</span> Profile
+                <span>👤</span> {t('topbar.profile')}
               </Link>
               <Link className="dropdown-item" to="/settings" onClick={() => setDropdownOpen(false)}>
-                <span>⚙️</span> Settings
+                <span>⚙️</span> {t('topbar.settings')}
               </Link>
               <div className="dropdown-divider" />
               <button className="dropdown-item danger" onClick={handleLogout}>
-                <span>🚪</span> Logout
+                <span>🚪</span> {t('topbar.logout')}
               </button>
             </div>
           )}

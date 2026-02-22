@@ -8,9 +8,11 @@ import FormField from '../../components/ui/FormField.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { branchesApi } from '../../api/services/branchesApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 export default function BranchesPage() {
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
@@ -103,8 +105,8 @@ export default function BranchesPage() {
   return (
     <>
       <PageHeader
-        title="Branches"
-        subtitle="Clinic locations"
+        title={t('pages.branches.title')}
+        subtitle={t('pages.branches.subtitle')}
         breadcrumb={[{ label: 'Settings', to: '/settings' }, { label: 'Branches' }]}
         actions={
           hasPermission('branches.write') && (

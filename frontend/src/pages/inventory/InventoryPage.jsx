@@ -11,10 +11,12 @@ import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { inventoryApi } from '../../api/services/inventoryApi.js'
 import { branchesApi } from '../../api/services/branchesApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 export default function InventoryPage() {
   const navigate = useNavigate()
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [lowStockOnly, setLowStockOnly] = useState(false)
@@ -73,8 +75,8 @@ export default function InventoryPage() {
   return (
     <>
       <PageHeader
-        title="Inventory"
-        subtitle="Stock and supplies"
+        title={t('pages.inventory.title')}
+        subtitle={t('pages.inventory.subtitle')}
         actions={
           hasPermission('inventory.write') && (
             <Button variant="primary" onClick={() => setCreateOpen(true)}>Add item</Button>

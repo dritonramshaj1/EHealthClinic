@@ -11,6 +11,7 @@ import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { labApi } from '../../api/services/labApi.js'
 import { appointmentsApi } from '../../api/services/appointmentsApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -22,6 +23,7 @@ const defaultTest = () => ({ testName: '', testCode: '', specimenType: '' })
 export default function LabOrdersPage() {
   const navigate = useNavigate()
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
@@ -111,8 +113,8 @@ export default function LabOrdersPage() {
   return (
     <>
       <PageHeader
-        title="Laboratory"
-        subtitle="Lab orders and results"
+        title={t('pages.laboratory.title')}
+        subtitle={t('pages.laboratory.subtitle')}
         actions={
           hasPermission('lab.write') && (
             <Button variant="primary" onClick={() => setCreateOpen(true)}>New order</Button>

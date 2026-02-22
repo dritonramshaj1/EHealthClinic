@@ -4,6 +4,7 @@ import Button from '../../components/ui/Button.jsx'
 import Table from '../../components/ui/Table.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { auditApi } from '../../api/services/auditApi.js'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -11,6 +12,7 @@ function formatDate(d) {
 }
 
 export default function AuditPage() {
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ userId: '', module: '', action: '', from: '', to: '' })
@@ -42,7 +44,7 @@ export default function AuditPage() {
 
   return (
     <>
-      <PageHeader title="Audit log" subtitle="System activity (admin)" />
+      <PageHeader title={t('pages.audit.title')} subtitle={t('pages.audit.subtitle')} />
       <div className="content-block">
         <div className="d-flex flex-wrap gap-2 mb-3 align-items-end">
           <div>

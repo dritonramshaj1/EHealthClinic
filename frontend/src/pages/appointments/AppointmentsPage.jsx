@@ -12,6 +12,7 @@ import ExportDropdown from '../../components/ui/ExportDropdown.jsx'
 import { appointmentsApi } from '../../api/services/appointmentsApi.js'
 import { directoryApi } from '../../api/services/directoryApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -22,6 +23,7 @@ function formatDate(d) {
 export default function AppointmentsPage() {
   const navigate = useNavigate()
   const { user, hasPermission, hasRole } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
@@ -105,8 +107,8 @@ export default function AppointmentsPage() {
   return (
     <>
       <PageHeader
-        title="Appointments"
-        subtitle="View and manage appointments"
+        title={t('pages.appointments.title')}
+        subtitle={t('pages.appointments.subtitle')}
         actions={
           <div className="d-flex gap-2 align-items-center flex-wrap">
             {hasPermission('appointments.read') && (

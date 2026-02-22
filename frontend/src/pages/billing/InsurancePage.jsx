@@ -10,6 +10,7 @@ import { Card, CardBody } from '../../components/ui/Card.jsx'
 import { insuranceApi } from '../../api/services/insuranceApi.js'
 import { invoicesApi } from '../../api/services/invoicesApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 function formatDate(d) {
   if (!d) return '—'
@@ -18,6 +19,7 @@ function formatDate(d) {
 
 export default function InsurancePage() {
   const { hasPermission } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('')
@@ -129,8 +131,8 @@ export default function InsurancePage() {
   return (
     <>
       <PageHeader
-        title="Insurance claims"
-        subtitle="Track insurance submissions"
+        title={t('pages.insurance.title')}
+        subtitle={t('pages.insurance.subtitle')}
         actions={
           hasPermission('insurance.write') && (
             <Button variant="primary" onClick={() => setCreateOpen(true)}>New claim</Button>

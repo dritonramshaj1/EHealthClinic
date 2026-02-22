@@ -12,6 +12,7 @@ import FormField from '../../components/ui/FormField.jsx'
 import { api } from '../../api/axios.js'
 import { patientsApi } from '../../api/services/patientsApi.js'
 import { useAuth } from '../../state/AuthContext.jsx'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 async function downloadPatientImportTemplate() {
   const res = await api.get('/import/patients/template', { responseType: 'blob' })
@@ -32,6 +33,7 @@ async function downloadPatientImportTemplate() {
 export default function PatientsPage() {
   const navigate = useNavigate()
   const { hasPermission, hasRole } = useAuth()
+  const { t } = useLang()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -88,8 +90,8 @@ export default function PatientsPage() {
   return (
     <>
       <PageHeader
-        title="Patients"
-        subtitle="Search and manage patients"
+        title={t('pages.patients.title')}
+        subtitle={t('pages.patients.subtitle')}
         actions={
           <div className="d-flex gap-2 align-items-center flex-wrap">
             {hasRole('Admin') && <ExportDropdown resource="patients" />}

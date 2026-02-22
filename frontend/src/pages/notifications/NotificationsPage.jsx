@@ -3,6 +3,7 @@ import PageHeader from '../../components/layout/PageHeader.jsx'
 import { Card, CardBody } from '../../components/ui/Card.jsx'
 import Button from '../../components/ui/Button.jsx'
 import { notificationsApi } from '../../api/services/notificationsApi.js'
+import { useLang } from '../../state/LanguageContext.jsx'
 
 const TYPE_LABELS = {
   All: 'Të gjitha',
@@ -20,6 +21,7 @@ function formatDate(d) {
 }
 
 export default function NotificationsPage() {
+  const { t } = useLang()
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('All')
@@ -61,8 +63,8 @@ export default function NotificationsPage() {
   return (
     <>
       <PageHeader
-        title="Njoftimet"
-        subtitle="Të gjitha njoftimet. Analiza, takime, mesazhe dhe receta."
+        title={t('pages.notifications.title')}
+        subtitle={t('pages.notifications.subtitle')}
       />
       <div className="content-block">
         <Card>
