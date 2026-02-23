@@ -125,6 +125,11 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --color-primary-subtle: rgba(37, 99, 235, 0.15);
+
+  /* Override gray scales used for hover/surface in dark mode */
+  --color-gray-50: #1e293b;
+  --color-gray-100: #334155;
+  --color-gray-200: #475569;
 }
 
 /* ── Reset & Base ── */
