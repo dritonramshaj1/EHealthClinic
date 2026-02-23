@@ -31,6 +31,10 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <Link to="/" className="auth-back-link">
+          ← Kthehu në faqen kryesore
+        </Link>
+
         <div className="auth-logo">
           <div className="auth-logo-icon">
             <img src="/logo.png" alt="EHealthClinic" />

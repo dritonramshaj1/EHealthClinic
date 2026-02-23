@@ -223,9 +223,9 @@
 
 .table tr:last-child td { border-bottom: none; }
 
-.table tr:hover td { background: var(--color-gray-50); }
+.table tr:hover td { background: var(--color-gray-100); }
 
-.table-striped tr:nth-child(even) td { background: var(--color-gray-50); }
+.table-striped tr:nth-child(even) td { background: var(--color-gray-100); }
 
 /* ── Badges ── */
 .badge {
@@ -540,6 +540,21 @@ textarea.form-control {
 }
 
 /* ── Auth (Login / Register) ── */
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: var(--space-4);
+  transition: color var(--transition-fast);
+}
+.auth-back-link:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -554,6 +569,14 @@ textarea.form-control {
   position: relative;
 }
 
+[data-theme="dark"] .auth-page {
+  background-color: #0f172a;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(37,99,235,0.08) 0%, transparent 70%),
+    radial-gradient(#334155 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px;
+}
+
 /* subtle vignette overlay so card pops */
 .auth-page::before {
   content: '';
@@ -561,6 +584,10 @@ textarea.form-control {
   inset: 0;
   background: radial-gradient(ellipse 65% 70% at 50% 50%, transparent 30%, rgba(15,23,42,0.06) 100%);
   pointer-events: none;
+}
+
+[data-theme="dark"] .auth-page::before {
+  background: radial-gradient(ellipse 65% 70% at 50% 50%, transparent 30%, rgba(0,0,0,0.25) 100%);
 }
 
 .auth-card {
@@ -628,4 +655,26 @@ textarea.form-control {
 
 @media (max-width: 640px) {
   .row-3 { grid-template-columns: 1fr; }
+}
+
+/* ── Dark Mode Specific Overrides ── */
+[data-theme="dark"] .table th {
+  background: #273548;
+}
+[data-theme="dark"] .table tr:hover td {
+  background: rgba(255, 255, 255, 0.05);
+}
+[data-theme="dark"] .table-striped tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.03);
+}
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+}
+[data-theme="dark"] .badge-gray {
+  background: #334155;
+  color: #94a3b8;
+}
+[data-theme="dark"] .form-control:disabled {
+  background: #1e293b;
 }

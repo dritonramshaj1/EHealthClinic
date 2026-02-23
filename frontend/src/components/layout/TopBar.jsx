@@ -78,16 +78,6 @@ export default function TopBar() {
         ☰
       </button>
 
-      {/* Search */}
-      <div className="topbar-search">
-        <span className="topbar-search-icon">🔍</span>
-        <input
-          type="text"
-          className="topbar-search-input"
-          placeholder={t('topbar.searchPlaceholder')}
-        />
-      </div>
-
       {/* Right actions */}
       <div className="topbar-right">
         {/* Notifications */}
