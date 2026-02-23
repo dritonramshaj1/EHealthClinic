@@ -54,6 +54,7 @@ public sealed class UsersController : ControllerBase
                 u.Id,
                 u.FullName,
                 u.Email,
+                u.PhoneNumber,
                 Roles = roles,
                 u.CreatedAtUtc,
                 u.IsDisabled
@@ -100,6 +101,7 @@ public sealed class UsersController : ControllerBase
             user.Id,
             user.FullName,
             user.Email,
+            user.PhoneNumber,
             Roles = roles,
             user.CreatedAtUtc,
             user.IsDisabled,
@@ -122,6 +124,7 @@ public sealed class UsersController : ControllerBase
             Email = req.Email.Trim().ToLowerInvariant(),
             UserName = req.Email.Trim().ToLowerInvariant(),
             FullName = req.FullName.Trim(),
+            PhoneNumber = req.PhoneNumber?.Trim(),
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -174,6 +177,9 @@ public sealed class UsersController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(req.FullName))
             user.FullName = req.FullName.Trim();
+
+        if (req.PhoneNumber is not null)
+            user.PhoneNumber = req.PhoneNumber.Trim();
 
         if (!string.IsNullOrWhiteSpace(req.Email) && req.Email != user.Email)
         {

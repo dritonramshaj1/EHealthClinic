@@ -8,6 +8,7 @@ using EHealthClinic.Api.Helpers;
 using EHealthClinic.Api.Models;
 using EHealthClinic.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
@@ -27,13 +28,22 @@ public sealed class ExportController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly IMedicalRecordService _records;
+    private readonly IWebHostEnvironment _env;
 
     static ExportController() => QuestPDF.Settings.License = LicenseType.Community;
 
-    public ExportController(ApplicationDbContext db, IMedicalRecordService records)
+    public ExportController(ApplicationDbContext db, IMedicalRecordService records, IWebHostEnvironment env)
     {
         _db = db;
         _records = records;
+        _env = env;
+    }
+
+    private byte[]? TryGetLogoBytes()
+    {
+        var wwwroot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+        var path = Path.Combine(wwwroot, "logo.png");
+        return System.IO.File.Exists(path) ? System.IO.File.ReadAllBytes(path) : null;
     }
 
     // ─── Appointments ─────────────────────────────────────────────────────────
@@ -305,18 +315,25 @@ public sealed class ExportController : ControllerBase
         using var wb = new XLWorkbook();
         var ws = wb.Worksheets.Add("Report");
 
-        ws.Cell(1, 1).Value = reportTitle;
+        // Clinic branding header
+        ws.Cell(1, 1).Value = "EHealth Clinic";
         ws.Cell(1, 1).Style.Font.Bold      = true;
-        ws.Cell(1, 1).Style.Font.FontSize  = 14;
-        ws.Cell(1, 1).Style.Font.FontColor = XLColor.FromHtml("#6366f1");
+        ws.Cell(1, 1).Style.Font.FontSize  = 11;
+        ws.Cell(1, 1).Style.Font.FontColor = XLColor.FromHtml("#2563eb");
         ws.Range(1, 1, 1, headers.Length).Merge();
 
-        ws.Cell(2, 1).Value = $"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC";
-        ws.Cell(2, 1).Style.Font.FontColor = XLColor.FromHtml("#6b7280");
-        ws.Cell(2, 1).Style.Font.FontSize  = 9;
+        ws.Cell(2, 1).Value = reportTitle;
+        ws.Cell(2, 1).Style.Font.Bold      = true;
+        ws.Cell(2, 1).Style.Font.FontSize  = 14;
+        ws.Cell(2, 1).Style.Font.FontColor = XLColor.FromHtml("#6366f1");
         ws.Range(2, 1, 2, headers.Length).Merge();
 
-        int dataStart = 4;
+        ws.Cell(3, 1).Value = $"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC";
+        ws.Cell(3, 1).Style.Font.FontColor = XLColor.FromHtml("#6b7280");
+        ws.Cell(3, 1).Style.Font.FontSize  = 9;
+        ws.Range(3, 1, 3, headers.Length).Merge();
+
+        int dataStart = 5;
 
         for (int c = 0; c < headers.Length; c++)
         {
@@ -354,6 +371,7 @@ public sealed class ExportController : ControllerBase
     private FileResult PdfResult(string title, string[] headers, string[][] rows, string filename)
     {
         int colCount = headers.Length;
+        var logoBytes = TryGetLogoBytes();
 
         var doc = PdfDoc.Create(container =>
         {
@@ -367,11 +385,13 @@ public sealed class ExportController : ControllerBase
                 {
                     col.Item().Row(row =>
                     {
-                        row.RelativeItem().Column(inner =>
+                        if (logoBytes is not null)
+                            row.ConstantItem(36).Image(logoBytes, ImageScaling.FitArea);
+                        row.RelativeItem().PaddingLeft(logoBytes is not null ? 10 : 0).Column(inner =>
                         {
                             inner.Item().Text(title).FontSize(18).Bold()
                                 .FontColor(PdfColor.FromHex("6366f1"));
-                            inner.Item().Text($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC")
+                            inner.Item().Text($"EHealth Clinic  ·  Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC")
                                 .FontSize(8).FontColor(PdfColor.FromHex("9ca3af"));
                         });
                         row.ConstantItem(80).AlignRight().AlignBottom()
@@ -446,6 +466,7 @@ public sealed class ExportController : ControllerBase
             mainPart.Document = new WDocument();
             var body = mainPart.Document.AppendChild(new Body());
 
+            AppendDocxClinicHeader(body);
             AppendDocxTitle(body, title);
             AppendDocxSubtitle(body, $"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC  |  Total: {rows.Length} records");
             AppendDocxParagraph(body, "");
@@ -551,6 +572,8 @@ public sealed class ExportController : ControllerBase
 
     private FileResult ProjectLogPdf(string title, string[][] summary, string[] apptHeaders, string[][] apptRows, string filename)
     {
+        var logoBytes = TryGetLogoBytes();
+
         var doc = PdfDoc.Create(container =>
         {
             container.Page(page =>
@@ -561,9 +584,17 @@ public sealed class ExportController : ControllerBase
 
                 page.Header().Column(col =>
                 {
-                    col.Item().Text(title).FontSize(20).Bold().FontColor(PdfColor.FromHex("6366f1"));
-                    col.Item().Text($"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC")
-                        .FontSize(8).FontColor(PdfColor.FromHex("9ca3af"));
+                    col.Item().Row(row =>
+                    {
+                        if (logoBytes is not null)
+                            row.ConstantItem(36).Image(logoBytes, ImageScaling.FitArea);
+                        row.RelativeItem().PaddingLeft(logoBytes is not null ? 10 : 0).Column(inner =>
+                        {
+                            inner.Item().Text(title).FontSize(20).Bold().FontColor(PdfColor.FromHex("6366f1"));
+                            inner.Item().Text($"EHealth Clinic  ·  Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC")
+                                .FontSize(8).FontColor(PdfColor.FromHex("9ca3af"));
+                        });
+                    });
                     col.Item().PaddingTop(6).LineHorizontal(2).LineColor(PdfColor.FromHex("6366f1"));
                 });
 
@@ -650,6 +681,7 @@ public sealed class ExportController : ControllerBase
             mainPart.Document = new WDocument();
             var body = mainPart.Document.AppendChild(new Body());
 
+            AppendDocxClinicHeader(body);
             AppendDocxTitle(body, title);
             AppendDocxSubtitle(body, $"Generated: {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC");
             AppendDocxParagraph(body, "");
@@ -674,6 +706,11 @@ public sealed class ExportController : ControllerBase
     // ═══════════════════════════════════════════════════════════════════════════
     // DOCX HELPERS
     // ═══════════════════════════════════════════════════════════════════════════
+
+    private static void AppendDocxClinicHeader(Body body)
+        => body.AppendChild(new Paragraph(new Run(
+            new RunProperties(new Bold(), new FontSize { Val = "28" }, new WColor { Val = "2563eb" }),
+            new Text("EHealth Clinic"))));
 
     private static void AppendDocxTitle(Body body, string text)
         => body.AppendChild(new Paragraph(new Run(
