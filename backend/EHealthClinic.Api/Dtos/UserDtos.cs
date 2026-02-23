@@ -5,6 +5,7 @@ public sealed record CreateUserRequest(
     string Email,
     string Password,
     string Role,
+    string? PhoneNumber,
     string? Specialty,
     string? LicenseNumber,
     string? Bio,
@@ -21,6 +22,7 @@ public sealed record CreateUserRequest(
 public sealed record UpdateUserRequest(
     string? FullName,
     string? Email,
+    string? PhoneNumber,
     string? Specialty,
     string? LicenseNumber,
     string? Bio,

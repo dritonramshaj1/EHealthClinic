@@ -10,6 +10,6 @@ public interface IAuditService
         string? userRole = null, string? ipAddress = null);
 
     Task<List<AuditLogResponse>> GetLogsAsync(
-        string? userId = null, string? module = null, string? action = null,
-        DateTime? from = null, DateTime? to = null, int limit = 100);
+        string? userId = null, string? userEmail = null, string? module = null,
+        string? action = null, DateTime? from = null, DateTime? to = null, int limit = 100);
 }

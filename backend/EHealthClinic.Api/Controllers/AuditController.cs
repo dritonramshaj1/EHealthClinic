@@ -19,13 +19,14 @@ public sealed class AuditController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetLogs(
         [FromQuery] string? userId,
+        [FromQuery] string? userEmail,
         [FromQuery] string? module,
         [FromQuery] string? action,
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
         [FromQuery] int limit = 100)
     {
-        var result = await _audit.GetLogsAsync(userId, module, action, from, to, limit);
+        var result = await _audit.GetLogsAsync(userId, userEmail, module, action, from, to, limit);
         return Ok(result);
     }
 }
