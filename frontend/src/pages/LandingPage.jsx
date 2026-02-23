@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../state/AuthContext.jsx'
 import { useLang } from '../state/LanguageContext.jsx'
+import { useUI } from '../state/UIContext.jsx'
 
 const features = (t) => [
   { icon: '👥', title: t('landing.f1Title'), desc: t('landing.f1Desc') },
@@ -21,6 +22,7 @@ const team = [
 export default function LandingPage() {
   const { user } = useAuth()
   const { t, lang, switchLang } = useLang()
+  const { darkMode, toggleDarkMode } = useUI()
   const featureList = features(t)
 
   return (
@@ -184,6 +186,67 @@ export default function LandingPage() {
           .lp-nav { padding: 0 1rem; }
           .lp-hero { padding: 3.5rem 1rem 3rem; }
         }
+
+        /* ── Dark Mode ─────────────────────────────────────── */
+        [data-theme="dark"] .lp-root { background: #0f172a; color: #f1f5f9; }
+
+        [data-theme="dark"] .lp-nav {
+          background: rgba(15,23,42,0.97);
+          border-bottom-color: #334155;
+        }
+        [data-theme="dark"] .lp-logo { color: #f1f5f9; }
+        [data-theme="dark"] .lp-lang-btn { background: #334155; border-color: #475569; color: #cbd5e1; }
+        [data-theme="dark"] .lp-lang-btn:hover { background: #475569; }
+        [data-theme="dark"] .lp-btn-ghost { color: #94a3b8; }
+        [data-theme="dark"] .lp-btn-ghost:hover { background: #1e293b; }
+
+        [data-theme="dark"] .lp-hero {
+          background: linear-gradient(135deg, #0c1a35 0%, #0d1f27 60%, #0f172a 100%);
+          border-bottom-color: #334155;
+        }
+        [data-theme="dark"] .lp-hero h1 { color: #f1f5f9; }
+        [data-theme="dark"] .lp-hero p { color: #94a3b8; }
+        [data-theme="dark"] .lp-badge { background: rgba(37,99,235,0.2); color: #93c5fd; border-color: #1d4ed8; }
+        [data-theme="dark"] .lp-btn-hero-outline { background: #1e293b; color: #60a5fa; border-color: #3b82f6; }
+        [data-theme="dark"] .lp-btn-hero-outline:hover { border-color: #60a5fa; }
+
+        [data-theme="dark"] .lp-mockup {
+          background: #1e293b;
+          border-color: #334155;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2);
+        }
+        [data-theme="dark"] .lp-mockup-bar { background: #0f172a; border-bottom-color: #334155; }
+        [data-theme="dark"] .lp-mockup-url { color: #475569; }
+        [data-theme="dark"] .lp-stat-card { background: #273548; border-color: #334155; }
+        [data-theme="dark"] .lp-stat-lbl { color: #94a3b8; }
+        [data-theme="dark"] .lp-progress-row { background: #273548; border-color: #334155; }
+        [data-theme="dark"] .lp-progress-bar { background: #334155; }
+        [data-theme="dark"] .lp-progress-label { color: #94a3b8; }
+
+        [data-theme="dark"] .lp-features { background: #0f172a; border-color: #334155; }
+        [data-theme="dark"] .lp-section-header h2 { color: #f1f5f9; }
+        [data-theme="dark"] .lp-section-header p { color: #64748b; }
+        [data-theme="dark"] .lp-feature-card { background: #1e293b; border-color: #334155; }
+        [data-theme="dark"] .lp-feature-card:hover { box-shadow: 0 8px 28px rgba(37,99,235,0.2); border-color: #3b82f6; }
+        [data-theme="dark"] .lp-feature-card h3 { color: #f1f5f9; }
+        [data-theme="dark"] .lp-feature-card p { color: #94a3b8; }
+
+        [data-theme="dark"] .lp-about { background: #0f172a; border-top-color: #334155; }
+        [data-theme="dark"] .lp-about-text h2 { color: #f1f5f9; }
+        [data-theme="dark"] .lp-about-text .lp-about-sub { color: #94a3b8; }
+        [data-theme="dark"] .lp-about-text p { color: #94a3b8; }
+        [data-theme="dark"] .lp-about-image { background: linear-gradient(135deg, #0c1a35 0%, #0d1f27 100%); border-color: #334155; }
+        [data-theme="dark"] .lp-about-stat { background: #273548; border-color: #334155; }
+        [data-theme="dark"] .lp-about-stat-val { color: #f1f5f9; }
+        [data-theme="dark"] .lp-about-stat-lbl { color: #94a3b8; }
+        [data-theme="dark"] .lp-about-val-card { background: #1e293b; border-color: #334155; }
+        [data-theme="dark"] .lp-about-val-card h4 { color: #f1f5f9; }
+        [data-theme="dark"] .lp-about-val-card p { color: #94a3b8; }
+
+        [data-theme="dark"] .lp-team { background: #0f172a; border-top-color: #334155; }
+        [data-theme="dark"] .lp-team-card { background: #1e293b; border-color: #334155; }
+        [data-theme="dark"] .lp-team-name { color: #f1f5f9; }
+        [data-theme="dark"] .lp-team-role { color: #94a3b8; }
       `}</style>
 
       <div className="lp-root">
@@ -201,6 +264,13 @@ export default function LandingPage() {
               onClick={() => switchLang(lang === 'sq' ? 'en' : 'sq')}
             >
               {lang === 'sq' ? '🇬🇧 EN' : '🇦🇱 SQ'}
+            </button>
+            <button
+              className="lp-lang-btn"
+              onClick={toggleDarkMode}
+              title={darkMode ? 'Light mode' : 'Dark mode'}
+            >
+              {darkMode ? '☀️' : '🌙'}
             </button>
             {user ? (
               <Link to="/dashboard" className="lp-btn-primary">{t('landing.goToDashboard')}</Link>
