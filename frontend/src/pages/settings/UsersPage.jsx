@@ -35,7 +35,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [form, setForm] = useState({
-    fullName: '', email: '', password: '', role: 'Patient',
+    fullName: '', email: '', password: '', role: 'Patient', phoneNumber: '',
     specialty: '', licenseNumber: '', bloodType: '', dateOfBirth: '', allergies: '',
   })
   const [creating, setCreating] = useState(false)
@@ -63,6 +63,7 @@ export default function UsersPage() {
       email: form.email.trim(),
       password: form.password,
       role: form.role,
+      phoneNumber: form.phoneNumber?.trim() || null,
     }
     if (form.role === 'Doctor') {
       payload.specialty = form.specialty?.trim() || 'General'
@@ -76,7 +77,7 @@ export default function UsersPage() {
     usersApi.create(payload)
       .then(() => {
         setCreateOpen(false)
-        setForm({ fullName: '', email: '', password: '', role: 'Patient', specialty: '', licenseNumber: '', bloodType: '', dateOfBirth: '', allergies: '' })
+        setForm({ fullName: '', email: '', password: '', role: 'Patient', phoneNumber: '', specialty: '', licenseNumber: '', bloodType: '', dateOfBirth: '', allergies: '' })
         loadList()
       })
       .catch(() => {})
@@ -104,7 +105,7 @@ export default function UsersPage() {
   const columns = [
     {
       key: 'fullName',
-      header: 'Name',
+      header: 'Emri',
       render: row => (
         <span style={row.isDisabled ? { color: 'var(--text-secondary)', textDecoration: 'line-through' } : {}}>
           {row.fullName}
@@ -115,16 +116,19 @@ export default function UsersPage() {
       key: 'email',
       header: 'Email',
       render: row => (
-        <span style={row.isDisabled ? { color: 'var(--text-secondary)' } : {}}>
-          {row.email}
-        </span>
+        <div>
+          <div style={row.isDisabled ? { color: 'var(--text-secondary)' } : {}}>{row.email}</div>
+          {row.phoneNumber && (
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>📞 {row.phoneNumber}</div>
+          )}
+        </div>
       ),
     },
-    { key: 'roles', header: 'Roles', render: row => (Array.isArray(row.roles) ? row.roles.join(', ') : row.roles) },
-    { key: 'createdAtUtc', header: 'Created', render: row => formatDate(row.createdAtUtc) },
+    { key: 'roles', header: 'Roli', render: row => (Array.isArray(row.roles) ? row.roles.join(', ') : row.roles) },
+    { key: 'createdAtUtc', header: 'Krijuar', render: row => formatDate(row.createdAtUtc) },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Veprime',
       render: row => (
         <div className="d-flex align-items-center gap-2">
           {row.isDisabled ? (
@@ -140,7 +144,7 @@ export default function UsersPage() {
             )
           )}
           {hasPermission('users.write') && (
-            <Button variant="ghost" size="sm" style={{ color: 'var(--color-danger)', opacity: 0.7 }} onClick={() => handleDeletePermanently(row)}>🗑 Delete</Button>
+            <Button variant="ghost" size="sm" style={{ color: 'var(--color-danger)', opacity: 0.7 }} onClick={() => handleDeletePermanently(row)}>🗑 Fshi</Button>
           )}
         </div>
       ),
@@ -157,45 +161,48 @@ export default function UsersPage() {
         breadcrumb={[{ label: 'Settings', to: '/settings' }, { label: 'Users' }]}
         actions={
           hasPermission('users.write') && (
-            <Button variant="primary" onClick={() => setCreateOpen(true)}>Add user</Button>
+            <Button variant="primary" onClick={() => setCreateOpen(true)}>Shto përdorues</Button>
           )
         }
       />
       <div className="content-block">
         <div className="mb-3">
           <select className="form-control" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ width: 180 }}>
-            <option value="">All roles</option>
+            <option value="">Të gjitha rolet</option>
             {roleOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
         <Card>
           <CardBody className="p-0">
-            <Table columns={columns} data={list} loading={loading} emptyMessage="No users" emptyIcon="👥" />
+            <Table columns={columns} data={list} loading={loading} emptyMessage="Nuk ka përdorues" emptyIcon="👥" />
           </CardBody>
         </Card>
       </div>
 
-      <Modal open={createOpen} onClose={() => !creating && setCreateOpen(false)} title="Add user" size="lg">
+      <Modal open={createOpen} onClose={() => !creating && setCreateOpen(false)} title="Shto përdorues" size="lg">
         <form onSubmit={handleCreate}>
-          <FormField label="Full name" required>
+          <FormField label="Emri i plotë" required>
             <input type="text" className="form-control" value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} />
           </FormField>
           <FormField label="Email" required>
             <input type="email" className="form-control" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
           </FormField>
-          <FormField label="Password" required>
+          <FormField label="Fjalëkalimi" required>
             <input type="password" className="form-control" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} minLength={6} />
           </FormField>
-          <FormField label="Role" required>
+          <FormField label="Nr. i telefonit">
+            <input type="tel" className="form-control" value={form.phoneNumber} onChange={e => setForm(f => ({ ...f, phoneNumber: e.target.value }))} placeholder="+383 4X XXX XXX" />
+          </FormField>
+          <FormField label="Roli" required>
             <Select options={roleOptions} value={form.role} onChange={v => setForm(f => ({ ...f, role: v }))} />
           </FormField>
 
           {form.role === 'Doctor' && (
             <>
-              <FormField label="Specialty">
+              <FormField label="Specializimi">
                 <input type="text" className="form-control" value={form.specialty} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))} placeholder="General" />
               </FormField>
-              <FormField label="License number">
+              <FormField label="Nr. i licencës">
                 <input type="text" className="form-control" value={form.licenseNumber} onChange={e => setForm(f => ({ ...f, licenseNumber: e.target.value }))} />
               </FormField>
             </>
@@ -203,25 +210,25 @@ export default function UsersPage() {
 
           {form.role === 'Patient' && (
             <>
-              <FormField label="Blood type">
+              <FormField label="Grupi i gjakut">
                 <select className="form-control" value={form.bloodType} onChange={e => setForm(f => ({ ...f, bloodType: e.target.value }))}>
                   <option value="">—</option>
                   <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
                   <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
                 </select>
               </FormField>
-              <FormField label="Date of birth">
+              <FormField label="Datëlindja">
                 <input type="date" className="form-control" value={form.dateOfBirth} onChange={e => setForm(f => ({ ...f, dateOfBirth: e.target.value }))} />
               </FormField>
-              <FormField label="Allergies">
+              <FormField label="Alergjitë">
                 <input type="text" className="form-control" value={form.allergies} onChange={e => setForm(f => ({ ...f, allergies: e.target.value }))} />
               </FormField>
             </>
           )}
 
           <div className="modal-footer mt-4">
-            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)} disabled={creating}>Cancel</Button>
-            <Button type="submit" variant="primary" loading={creating} disabled={!form.fullName?.trim() || !form.email?.trim() || !form.password}>Create</Button>
+            <Button type="button" variant="ghost" onClick={() => setCreateOpen(false)} disabled={creating}>Anulo</Button>
+            <Button type="submit" variant="primary" loading={creating} disabled={!form.fullName?.trim() || !form.email?.trim() || !form.password}>Krijo</Button>
           </div>
         </form>
       </Modal>
