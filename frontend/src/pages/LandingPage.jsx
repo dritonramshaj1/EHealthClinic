@@ -167,16 +167,6 @@ export default function LandingPage() {
         .lp-team-name { font-weight: 700; font-size: 0.88rem; color: #0f172a; }
         .lp-team-role { font-size: 0.76rem; color: #64748b; margin-top: 3px; }
 
-        /* CTA */
-        .lp-cta { background: linear-gradient(135deg, #1e40af 0%, #0d9488 100%); padding: 4.5rem 2rem; text-align: center; }
-        .lp-cta h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #fff; margin-bottom: 0.85rem; }
-        .lp-cta p { color: #bfdbfe; font-size: 0.95rem; max-width: 460px; margin: 0 auto 2.25rem; }
-        .lp-cta-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .lp-btn-cta-white { background: #fff; color: #1d4ed8; padding: 0.7rem 1.75rem; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 0.95rem; }
-        .lp-btn-cta-white:hover { background: #f0f9ff; }
-        .lp-btn-cta-outline { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 0.7rem 1.75rem; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 0.95rem; }
-        .lp-btn-cta-outline:hover { background: rgba(255,255,255,0.2); }
-
         /* Footer */
         .lp-footer { background: #0f172a; color: #94a3b8; padding: 2.5rem 2rem; text-align: center; }
         .lp-footer-logo { display: flex; align-items: center; justify-content: center; gap: 9px; margin-bottom: 1.25rem; }
@@ -234,8 +224,8 @@ export default function LandingPage() {
             </h1>
             <p>{t('landing.heroSubtitle')}</p>
             <div className="lp-hero-btns">
-              <Link to="/register" className="lp-btn-hero-primary">{t('landing.startFree')}</Link>
-              <Link to="/login" className="lp-btn-hero-outline">{t('landing.login')}</Link>
+              <Link to="/login" className="lp-btn-hero-primary">{t('landing.login')}</Link>
+              <Link to="/register" className="lp-btn-hero-outline">{t('landing.register')}</Link>
             </div>
           </div>
 
@@ -380,16 +370,6 @@ export default function LandingPage() {
                 <div className="lp-team-role">{m.role}</div>
               </div>
             ))}
-          </div>
-        </section>
-
-        {/* ── CTA ─────────────────────────────────────────────── */}
-        <section className="lp-cta">
-          <h2>{t('landing.ctaTitle')}</h2>
-          <p>{t('landing.ctaSubtitle')}</p>
-          <div className="lp-cta-btns">
-            <Link to="/register" className="lp-btn-cta-white">{t('landing.startFree')}</Link>
-            <Link to="/login" className="lp-btn-cta-outline">{t('landing.login')}</Link>
           </div>
         </section>
 
