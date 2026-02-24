@@ -10,6 +10,9 @@ import { queueApi } from '../../api/services/queueApi.js'
 import { branchesApi } from '../../api/services/branchesApi.js'
 import { messagesApi } from '../../api/services/messagesApi.js'
 import { appointmentsApi } from '../../api/services/appointmentsApi.js'
+import { labApi } from '../../api/services/labApi.js'
+import { prescriptionsApi } from '../../api/services/prescriptionsApi.js'
+import { inventoryApi } from '../../api/services/inventoryApi.js'
 import { StatusPieChart, MonthlyTrendChart, PerDoctorBarChart, SpecialtiesBarChart } from '../../components/dashboard/DashboardCharts.jsx'
 import MiniCalendar from '../../components/dashboard/MiniCalendar.jsx'
 import UpcomingAppointments from '../../components/dashboard/UpcomingAppointments.jsx'
@@ -54,6 +57,10 @@ export default function DashboardPage() {
   const [todayAppointments, setTodayAppointments] = useState(null)
   const [upcomingAppointments, setUpcomingAppointments] = useState([])
   const [firstBranchId, setFirstBranchId] = useState(null)
+  const [labPendingCount, setLabPendingCount] = useState(null)
+  const [labInProgressCount, setLabInProgressCount] = useState(null)
+  const [activePrescriptionsCount, setActivePrescriptionsCount] = useState(null)
+  const [lowStockCount, setLowStockCount] = useState(null)
 
   const appointmentsByDate = useMemo(() => {
     const byDate = {}
@@ -90,11 +97,36 @@ export default function DashboardPage() {
           .catch(() => {})
       )
       fetches.push(
-        appointmentsApi.list({ fromUtc: new Date().toISOString(), toUtc: nextDaysStart(14) })
+        appointmentsApi.list({ fromUtc: new Date().toISOString() })
           .then(r => {
-            const list = (r.data || []).filter(a => new Date(a.startsAtUtc) >= new Date()).sort((a, b) => new Date(a.startsAtUtc) - new Date(b.startsAtUtc))
+            const list = (r.data || [])
+              .filter(a => new Date(a.startsAtUtc) >= new Date())
+              .sort((a, b) => new Date(a.startsAtUtc) - new Date(b.startsAtUtc))
             setUpcomingAppointments(list)
           })
+          .catch(() => {})
+      )
+    }
+    if (primaryRole === 'LabTechnician') {
+      fetches.push(
+        labApi.listOrders()
+          .then(r => {
+            const orders = r.data || []
+            setLabPendingCount(orders.filter(o => o.status === 'Ordered').length)
+            setLabInProgressCount(orders.filter(o => o.status === 'InProgress').length)
+          })
+          .catch(() => {})
+      )
+    }
+    if (primaryRole === 'Pharmacist') {
+      fetches.push(
+        prescriptionsApi.list({ status: 'Active' })
+          .then(r => setActivePrescriptionsCount((r.data || []).length))
+          .catch(() => {})
+      )
+      fetches.push(
+        inventoryApi.list({ lowStockOnly: true })
+          .then(r => setLowStockCount((r.data || []).length))
           .catch(() => {})
       )
     }
@@ -269,6 +301,7 @@ export default function DashboardPage() {
               <div className="dashboard-quick-grid">
                 <QuickLink to="/appointments" icon="📅" label={t('nav.appointments')} subtitle={t('dashboard.bookOrView')} variant="primary" />
                 <QuickLink to="/clinical/prescriptions" icon="💊" label={t('nav.prescriptions')} subtitle={t('dashboard.myPrescriptions')} variant="teal" />
+                <QuickLink to="/medical-history" icon="📋" label="Medical History" subtitle="Your health records" variant="success" />
                 <QuickLink to="/messages" icon="✉️" label={t('nav.messages')} subtitle={unreadMessages ? `${unreadMessages} ${t('dashboard.unreadMessages').toLowerCase()}` : t('dashboard.sendMessage')} variant="success" />
                 <QuickLink to="/billing/invoices" icon="🧾" label={t('nav.invoices')} subtitle={t('dashboard.billing')} variant="warning" />
               </div>
@@ -334,6 +367,19 @@ export default function DashboardPage() {
           <>
             <section className="dashboard-section">
               <h3 className="dashboard-section-title">{t('dashboard.labSection')}</h3>
+              <div className="stat-grid mb-3">
+                <Link to="/laboratory" style={{ textDecoration: 'none' }}>
+                  <StatCard title="Pending orders" value={labPendingCount ?? '—'} icon="🧪" variant="warning" />
+                </Link>
+                <Link to="/laboratory" style={{ textDecoration: 'none' }}>
+                  <StatCard title="In progress" value={labInProgressCount ?? '—'} icon="🔬" variant="teal" />
+                </Link>
+                {hasPermission('messages.read') && (
+                  <Link to="/messages" style={{ textDecoration: 'none' }}>
+                    <StatCard title={t('dashboard.unreadMessages')} value={unreadMessages} icon="✉️" variant="primary" />
+                  </Link>
+                )}
+              </div>
               <div className="dashboard-quick-grid">
                 <QuickLink to="/laboratory" icon="🧪" label={t('dashboard.labOrders')} subtitle={t('pages.laboratory.subtitle')} variant="primary" />
                 <QuickLink to="/documents" icon="📄" label={t('nav.documents')} subtitle={t('nav.documents')} variant="teal" />
@@ -356,6 +402,19 @@ export default function DashboardPage() {
           <>
             <section className="dashboard-section">
               <h3 className="dashboard-section-title">{t('dashboard.pharmacySection')}</h3>
+              <div className="stat-grid mb-3">
+                <Link to="/clinical/prescriptions" style={{ textDecoration: 'none' }}>
+                  <StatCard title="Active prescriptions" value={activePrescriptionsCount ?? '—'} icon="💊" variant="primary" />
+                </Link>
+                <Link to="/inventory" style={{ textDecoration: 'none' }}>
+                  <StatCard title="Low stock items" value={lowStockCount ?? '—'} icon="📦" variant="danger" />
+                </Link>
+                {hasPermission('messages.read') && (
+                  <Link to="/messages" style={{ textDecoration: 'none' }}>
+                    <StatCard title={t('dashboard.unreadMessages')} value={unreadMessages} icon="✉️" variant="warning" />
+                  </Link>
+                )}
+              </div>
               <div className="dashboard-quick-grid">
                 <QuickLink to="/clinical/prescriptions" icon="💊" label={t('nav.prescriptions')} subtitle={t('dashboard.dispensable')} variant="primary" />
                 <QuickLink to="/inventory" icon="📦" label={t('nav.inventory')} subtitle={t('dashboard.stockLevel')} variant="teal" />

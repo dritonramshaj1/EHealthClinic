@@ -27,6 +27,7 @@ export default function InventoryDetailPage() {
   const [movementOpen, setMovementOpen] = useState(false)
   const [movementForm, setMovementForm] = useState({ movementType: 'In', quantity: 1, reason: '' })
   const [adding, setAdding] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const load = () => {
     if (!id) return
@@ -41,6 +42,15 @@ export default function InventoryDetailPage() {
   }
 
   useEffect(() => load(), [id])
+
+  const handleDelete = () => {
+    if (!confirm('Delete this item? This cannot be undone.')) return
+    setDeleting(true)
+    inventoryApi.delete(id)
+      .then(() => navigate('/inventory'))
+      .catch(() => {})
+      .finally(() => setDeleting(false))
+  }
 
   const handleAddMovement = (e) => {
     e.preventDefault()
@@ -76,7 +86,10 @@ export default function InventoryDetailPage() {
           <>
             <Button variant="ghost" onClick={() => navigate('/inventory')}>Back</Button>
             {hasPermission('inventory.write') && (
-              <Button variant="primary" onClick={() => setMovementOpen(true)}>Add movement</Button>
+              <>
+                <Button variant="primary" onClick={() => setMovementOpen(true)}>Add movement</Button>
+                <Button variant="danger" loading={deleting} onClick={handleDelete}>Delete item</Button>
+              </>
             )}
           </>
         }
