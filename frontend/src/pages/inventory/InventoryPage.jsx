@@ -23,7 +23,7 @@ export default function InventoryPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [branches, setBranches] = useState([])
   const [form, setForm] = useState({
-    name: '', description: '', category: 'General', sku: '', reorderLevel: 0, unitCost: '', unit: 'pcs', branchId: '', expiresAtUtc: '',
+    name: '', description: '', category: 'General', sku: '', reorderLevel: 0, unitCost: '', unit: 'pcs', branchId: '', expiresAtUtc: '', initialQuantity: 0,
   })
   const [creating, setCreating] = useState(false)
 
@@ -45,6 +45,7 @@ export default function InventoryPage() {
     e.preventDefault()
     if (!form.name?.trim()) return
     setCreating(true)
+    const initialQty = parseInt(form.initialQuantity, 10) || 0
     inventoryApi.create({
       name: form.name.trim(),
       description: form.description?.trim() || null,
@@ -56,7 +57,14 @@ export default function InventoryPage() {
       branchId: form.branchId || null,
       expiresAtUtc: form.expiresAtUtc ? new Date(form.expiresAtUtc).toISOString() : null,
     })
-      .then(() => { setCreateOpen(false); setForm({ name: '', description: '', category: 'General', sku: '', reorderLevel: 0, unitCost: '', unit: 'pcs', branchId: '', expiresAtUtc: '' }); loadList() })
+      .then(async (res) => {
+        if (initialQty > 0 && res.data?.id) {
+          await inventoryApi.addMovement(res.data.id, { movementType: 'In', quantity: initialQty, reason: 'Initial stock', referenceId: null }).catch(() => {})
+        }
+        setCreateOpen(false)
+        setForm({ name: '', description: '', category: 'General', sku: '', reorderLevel: 0, unitCost: '', unit: 'pcs', branchId: '', expiresAtUtc: '', initialQuantity: 0 })
+        loadList()
+      })
       .catch(() => {})
       .finally(() => setCreating(false))
   }
@@ -117,6 +125,9 @@ export default function InventoryPage() {
             <input type="text" className="form-control" value={form.sku} onChange={e => setForm(f => ({ ...f, sku: e.target.value }))} />
           </FormField>
           <div className="grid grid-2 gap-2">
+            <FormField label="Initial quantity">
+              <input type="number" min={0} className="form-control" value={form.initialQuantity} onChange={e => setForm(f => ({ ...f, initialQuantity: e.target.value }))} placeholder="0" />
+            </FormField>
             <FormField label="Reorder level">
               <input type="number" min={0} className="form-control" value={form.reorderLevel} onChange={e => setForm(f => ({ ...f, reorderLevel: e.target.value }))} />
             </FormField>
