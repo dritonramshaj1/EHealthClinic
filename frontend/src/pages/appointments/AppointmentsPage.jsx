@@ -106,6 +106,15 @@ export default function AppointmentsPage() {
       setSaveError('Mbarimi duhet të jetë pas fillimit.')
       return
     }
+    const durationMinutes = (end - start) / 60000
+    if (durationMinutes < 5) {
+      setSaveError('Takimi duhet të zgjasë të paktën 5 minuta.')
+      return
+    }
+    if (durationMinutes > 480) {
+      setSaveError('Takimi nuk mund të zgjasë më shumë se 8 orë. Kontrolloni datën e mbarimit.')
+      return
+    }
     setSaving(true)
     appointmentsApi.create({
       doctorId: form.doctorId,

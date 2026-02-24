@@ -28,3 +28,5 @@ backend/EHealthClinic.Api/Storage/
 
 # Claude Code local settings
 .claude/
+/appointments_2026-02-23.pdf
+/USER_MANUAL.md

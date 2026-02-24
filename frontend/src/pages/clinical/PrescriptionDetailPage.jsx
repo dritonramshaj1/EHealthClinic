@@ -52,6 +52,50 @@ export default function PrescriptionDetailPage() {
     prescriptionsApi.cancel(id).then(() => navigate('/clinical/prescriptions')).catch(() => {})
   }
 
+  const handlePrint = () => {
+    if (!prescription) return
+    const rows = (prescription.items || []).map(item => `
+      <tr>
+        <td>${item.medicationName || '—'}</td>
+        <td>${item.dosage || '—'}</td>
+        <td>${item.frequency || '—'}</td>
+        <td>${item.durationDays} days</td>
+        <td>${item.instructions || '—'}</td>
+        <td>${item.quantity ?? '—'}</td>
+      </tr>`).join('')
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>Prescription — ${prescription.patientName}</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:40px;color:#000}
+  h1{font-size:20px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:16px}
+  h2{font-size:15px;margin-top:24px}
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .lbl{font-size:11px;font-weight:bold;color:#555;text-transform:uppercase}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #bbb;padding:6px 10px;font-size:13px;text-align:left}
+  th{background:#f5f5f5;font-weight:bold}
+  .footer{margin-top:40px;font-size:11px;color:#999}
+  @media print{body{margin:20px}}
+</style></head><body>
+<h1>EHealth Clinic — Prescription</h1>
+<div class="info">
+  <div><span class="lbl">Patient</span><br/>${prescription.patientName}${prescription.patientMRN ? ` (${prescription.patientMRN})` : ''}</div>
+  <div><span class="lbl">Doctor</span><br/>${prescription.doctorName}</div>
+  <div><span class="lbl">Status</span><br/>${prescription.status}</div>
+  <div><span class="lbl">Issued</span><br/>${formatDate(prescription.issuedAtUtc)}</div>
+  ${prescription.expiresAtUtc ? `<div><span class="lbl">Expires</span><br/>${formatDate(prescription.expiresAtUtc)}</div>` : ''}
+</div>
+${prescription.notes ? `<p><strong>Notes:</strong> ${prescription.notes}</p>` : ''}
+<h2>Medications</h2>
+<table><thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th><th>Qty</th></tr></thead>
+<tbody>${rows}</tbody></table>
+<p class="footer">Printed: ${new Date().toLocaleString()}</p>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`
+    const w = window.open('', '_blank', 'width=860,height=620')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
   if (loading) return <div className="text-center py-5"><span className="spinner" /></div>
   if (!prescription) return <div className="alert alert-danger">Prescription not found.</div>
 
@@ -63,6 +107,7 @@ export default function PrescriptionDetailPage() {
         actions={
           <>
             <Button variant="ghost" onClick={() => navigate('/clinical/prescriptions')}>Back to list</Button>
+            <Button variant="secondary" onClick={handlePrint}>Print / PDF</Button>
             {hasPermission('prescriptions.write') && prescription.status !== 'Cancelled' && (
               <>
                 <Button variant="secondary" onClick={() => setStatusModalOpen(true)}>Change status</Button>

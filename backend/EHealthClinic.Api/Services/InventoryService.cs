@@ -19,7 +19,7 @@ public sealed class InventoryService : IInventoryService
         var q = _db.InventoryItems.Include(i => i.Branch).AsQueryable();
         if (branchId.HasValue) q = q.Where(i => i.BranchId == branchId.Value);
         if (!string.IsNullOrEmpty(category)) q = q.Where(i => i.Category == category);
-        if (lowStockOnly) q = q.Where(i => i.QuantityOnHand <= i.ReorderLevel);
+        if (lowStockOnly) q = q.Where(i => i.ReorderLevel > 0 && i.QuantityOnHand < i.ReorderLevel);
 
         return await q.OrderBy(i => i.Name).Select(i => ToResponse(i)).ToListAsync();
     }
@@ -110,9 +110,18 @@ public sealed class InventoryService : IInventoryService
             .ToListAsync();
     }
 
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var item = await _db.InventoryItems.FindAsync(id);
+        if (item is null) return false;
+        _db.InventoryItems.Remove(item);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     private static InventoryItemResponse ToResponse(InventoryItem i) =>
         new(i.Id, i.Name, i.Description, i.Category, i.SKU,
             i.QuantityOnHand, i.ReorderLevel, i.UnitCost, i.Unit,
             i.BranchId, i.Branch?.Name, i.ExpiresAtUtc, i.IsActive,
-            i.QuantityOnHand <= i.ReorderLevel, i.CreatedAtUtc);
+            i.ReorderLevel > 0 && i.QuantityOnHand < i.ReorderLevel, i.CreatedAtUtc);
 }

@@ -34,7 +34,7 @@ public sealed class HRController : ControllerBase
     public async Task<IActionResult> CreateShift([FromBody] CreateStaffShiftRequest request)
     {
         var result = await _hr.CreateShiftAsync(request);
-        await _audit.LogAsync(GetUserId(), "Create", "StaffShift", result.Id.ToString(), $"Shift created for user {result.UserId}");
+        await _audit.LogAsync(GetUserId(), "Create", "StaffShift", null, result.Id.ToString(), $"Shift created for user {result.UserId}");
         return Ok(result);
     }
 
@@ -44,8 +44,28 @@ public sealed class HRController : ControllerBase
     {
         var result = await _hr.UpdateShiftStatusAsync(id, request.Status);
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Update", "StaffShift", id.ToString(), $"Shift status → {request.Status}");
+        await _audit.LogAsync(GetUserId(), "Update", "StaffShift", null, id.ToString(), $"Shift status → {request.Status}");
         return Ok(result);
+    }
+
+    [HttpPut("shifts/{id:guid}")]
+    [Authorize(Policy = "hr.write")]
+    public async Task<IActionResult> UpdateShift(Guid id, [FromBody] UpdateStaffShiftRequest request)
+    {
+        var result = await _hr.UpdateShiftAsync(id, request);
+        if (result is null) return NotFound();
+        await _audit.LogAsync(GetUserId(), "Update", "StaffShift", null, id.ToString(), "Shift updated");
+        return Ok(result);
+    }
+
+    [HttpDelete("shifts/{id:guid}")]
+    [Authorize(Policy = "hr.write")]
+    public async Task<IActionResult> DeleteShift(Guid id)
+    {
+        var deleted = await _hr.DeleteShiftAsync(id);
+        if (!deleted) return NotFound();
+        await _audit.LogAsync(GetUserId(), "Delete", "StaffShift", null, id.ToString(), "Shift deleted");
+        return NoContent();
     }
 
     // ── Leave Requests ────────────────────────────────────────
@@ -63,7 +83,7 @@ public sealed class HRController : ControllerBase
     public async Task<IActionResult> CreateLeaveRequest([FromBody] CreateLeaveRequestRequest request)
     {
         var result = await _hr.CreateLeaveRequestAsync(request);
-        await _audit.LogAsync(GetUserId(), "Create", "LeaveRequest", result.Id.ToString(), $"Leave request by user {result.UserId}");
+        await _audit.LogAsync(GetUserId(), "Create", "LeaveRequest", null, result.Id.ToString(), $"Leave request by user {result.UserId}");
         return Ok(result);
     }
 
@@ -74,7 +94,7 @@ public sealed class HRController : ControllerBase
         request = request with { ReviewedByUserId = GetUserId() };
         var result = await _hr.ReviewLeaveRequestAsync(id, request);
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Review", "LeaveRequest", id.ToString(), $"Leave request {request.Status}");
+        await _audit.LogAsync(GetUserId(), "Review", "LeaveRequest", null, id.ToString(), $"Leave request {request.Status}");
         return Ok(result);
     }
 

@@ -57,6 +57,56 @@ export default function LabOrderDetailPage() {
       .finally(() => setUpdating(false))
   }
 
+  const handlePrint = () => {
+    if (!order) return
+    const tests = (order.tests || []).map(t =>
+      `<li>${t.status} — <strong>${t.testName}</strong>${t.testCode ? ` (${t.testCode})` : ''}${t.specimenType ? ` · ${t.specimenType}` : ''}</li>`
+    ).join('')
+    const results = (order.results || []).map(r => `
+      <tr>
+        <td>${r.testName || '—'}</td>
+        <td>${r.value || '—'}</td>
+        <td>${r.unit || '—'}</td>
+        <td>${r.referenceRange || '—'}</td>
+        <td>${r.flag || '—'}</td>
+        <td>${formatDate(r.resultAtUtc)}</td>
+      </tr>`).join('')
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>Lab Order — ${order.patientName}</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:40px;color:#000}
+  h1{font-size:20px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:16px}
+  h2{font-size:15px;margin-top:24px}
+  .info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .lbl{font-size:11px;font-weight:bold;color:#555;text-transform:uppercase}
+  ul{margin:8px 0;padding-left:20px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #bbb;padding:6px 10px;font-size:13px;text-align:left}
+  th{background:#f5f5f5;font-weight:bold}
+  .footer{margin-top:40px;font-size:11px;color:#999}
+  @media print{body{margin:20px}}
+</style></head><body>
+<h1>EHealth Clinic — Lab Order</h1>
+<div class="info">
+  <div><span class="lbl">Patient</span><br/>${order.patientName}${order.patientMRN ? ` (${order.patientMRN})` : ''}</div>
+  <div><span class="lbl">Doctor</span><br/>${order.doctorName}</div>
+  <div><span class="lbl">Status</span><br/>${order.status}</div>
+  <div><span class="lbl">Priority</span><br/>${order.priority || '—'}</div>
+  <div><span class="lbl">Ordered</span><br/>${formatDate(order.orderedAtUtc)}</div>
+  ${order.completedAtUtc ? `<div><span class="lbl">Completed</span><br/>${formatDate(order.completedAtUtc)}</div>` : ''}
+</div>
+${order.notes ? `<p><strong>Notes:</strong> ${order.notes}</p>` : ''}
+<h2>Tests</h2><ul>${tests || '<li>No tests</li>'}</ul>
+${results ? `<h2>Results</h2>
+<table><thead><tr><th>Test</th><th>Value</th><th>Unit</th><th>Reference</th><th>Flag</th><th>Date</th></tr></thead>
+<tbody>${results}</tbody></table>` : ''}
+<p class="footer">Printed: ${new Date().toLocaleString()}</p>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`
+    const w = window.open('', '_blank', 'width=860,height=620')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
   const handleAddResult = (e) => {
     e.preventDefault()
     if (!resultForm.labOrderTestId || !resultForm.value?.trim()) return
@@ -101,6 +151,7 @@ export default function LabOrderDetailPage() {
         actions={
           <>
             <Button variant="ghost" onClick={() => navigate('/laboratory')}>Back</Button>
+            <Button variant="secondary" onClick={handlePrint}>Print / PDF</Button>
             {hasPermission('lab.write') && order?.status !== 'Cancelled' && (
               <>
                 <Button variant="secondary" onClick={() => setStatusModalOpen(true)}>Change status</Button>

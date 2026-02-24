@@ -20,6 +20,7 @@ const PlaceholderPage = lazy(() => import('./pages/PlaceholderPage.jsx'))
 // Sprint 5: Core pages
 const PatientsPage = lazy(() => import('./pages/patients/PatientsPage.jsx'))
 const PatientDetailPage = lazy(() => import('./pages/patients/PatientDetailPage.jsx'))
+const MedicalHistoryPage = lazy(() => import('./pages/patients/MedicalHistoryPage.jsx'))
 const AppointmentsPage = lazy(() => import('./pages/appointments/AppointmentsPage.jsx'))
 const AppointmentDetailPage = lazy(() => import('./pages/appointments/AppointmentDetailPage.jsx'))
 const QueuePage = lazy(() => import('./pages/queue/QueuePage.jsx'))
@@ -68,6 +69,7 @@ export default function App() {
 
         <Route path="patients" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="patients.read"><PatientsPage /></PermissionRoute></Suspense>} />
         <Route path="patients/:id" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="patients.read"><PatientDetailPage /></PermissionRoute></Suspense>} />
+        <Route path="medical-history" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="medical-records.read"><MedicalHistoryPage /></PermissionRoute></Suspense>} />
         <Route path="appointments" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="appointments.read"><AppointmentsPage /></PermissionRoute></Suspense>} />
         <Route path="appointments/:id" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="appointments.read"><AppointmentDetailPage /></PermissionRoute></Suspense>} />
         <Route path="queue" element={<Suspense fallback={<Spinner center />}><PermissionRoute permission="queue.read"><QueuePage /></PermissionRoute></Suspense>} />

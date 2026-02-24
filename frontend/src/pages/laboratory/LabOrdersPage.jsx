@@ -50,9 +50,9 @@ export default function LabOrdersPage() {
 
   useEffect(() => {
     if (createOpen) {
-      appointmentsApi.list({ status: 'Scheduled' })
+      appointmentsApi.list()
         .then(res => {
-          const data = res.data || []
+          const data = (res.data || []).filter(a => a.status !== 'Cancelled')
           setAppointments(data)
           setForm(f => ({ ...f, appointmentId: '', doctorId: '', patientId: '', tests: [defaultTest()] }))
         })

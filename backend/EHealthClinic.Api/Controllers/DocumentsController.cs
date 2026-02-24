@@ -39,7 +39,7 @@ public sealed class DocumentsController : ControllerBase
 
         var userId = GetUserId();
         var result = await _documents.UploadAsync(patientId, userId, file, documentType, description);
-        await _audit.LogAsync(userId, "Upload", "PatientDocument", result.Id.ToString(), $"Document uploaded for patient {patientId}: {result.OriginalFileName}");
+        await _audit.LogAsync(userId, "Upload", "PatientDocument", null, result.Id.ToString(), $"Document uploaded for patient {patientId}: {result.OriginalFileName}");
         return Ok(result);
     }
 
@@ -60,7 +60,7 @@ public sealed class DocumentsController : ControllerBase
     {
         var ok = await _documents.DeleteAsync(id);
         if (!ok) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Delete", "PatientDocument", id.ToString(), "Document deleted");
+        await _audit.LogAsync(GetUserId(), "Delete", "PatientDocument", null, id.ToString(), "Document deleted");
         return NoContent();
     }
 

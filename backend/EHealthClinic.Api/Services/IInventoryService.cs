@@ -10,4 +10,5 @@ public interface IInventoryService
     Task<InventoryItemResponse?> UpdateAsync(Guid id, UpdateInventoryItemRequest request);
     Task<InventoryMovementResponse> AddMovementAsync(Guid itemId, CreateInventoryMovementRequest request);
     Task<List<InventoryMovementResponse>> GetMovementsAsync(Guid itemId);
+    Task<bool> DeleteAsync(Guid id);
 }

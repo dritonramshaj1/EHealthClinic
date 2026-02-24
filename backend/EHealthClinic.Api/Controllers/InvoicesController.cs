@@ -40,7 +40,7 @@ public sealed class InvoicesController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateInvoiceRequest request)
     {
         var result = await _invoices.CreateAsync(request);
-        await _audit.LogAsync(GetUserId(), "Create", "Invoice", result.Id.ToString(), $"Invoice {result.InvoiceNumber} created");
+        await _audit.LogAsync(GetUserId(), "Create", "Invoice", null, result.Id.ToString(), $"Invoice {result.InvoiceNumber} created");
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
@@ -50,7 +50,7 @@ public sealed class InvoicesController : ControllerBase
     {
         var result = await _invoices.UpdateStatusAsync(id, request.Status);
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Update", "Invoice", id.ToString(), $"Invoice status → {request.Status}");
+        await _audit.LogAsync(GetUserId(), "Update", "Invoice", null, id.ToString(), $"Invoice status → {request.Status}");
         return Ok(result);
     }
 
@@ -60,7 +60,7 @@ public sealed class InvoicesController : ControllerBase
     {
         var result = await _invoices.UpdateStatusAsync(id, "Paid");
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Pay", "Invoice", id.ToString(), "Invoice marked as paid");
+        await _audit.LogAsync(GetUserId(), "Pay", "Invoice", null, id.ToString(), "Invoice marked as paid");
         return Ok(result);
     }
 

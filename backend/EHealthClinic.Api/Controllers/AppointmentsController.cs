@@ -57,7 +57,7 @@ public sealed class AppointmentsController : ControllerBase
                 (a.Reason != null && a.Reason.ToLower().Contains(s)));
         }
 
-        if (roles.Contains(Roles.Admin))
+        if (roles.Contains(Roles.Admin) || roles.Contains(Roles.Receptionist))
         {
             // all
         }
@@ -93,24 +93,32 @@ public sealed class AppointmentsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Doctor}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Doctor},{Roles.Receptionist}")]
     public async Task<ActionResult> Create([FromBody] CreateAppointmentRequest req)
     {
         if (req.EndsAtUtc <= req.StartsAtUtc)
             return BadRequest(new { error = "EndsAtUtc must be after StartsAtUtc." });
 
+        if ((req.EndsAtUtc - req.StartsAtUtc).TotalMinutes > 480)
+            return BadRequest(new { error = "Appointment duration cannot exceed 8 hours. Please check the end date/time." });
+
         var doctor = await _db.Doctors.Include(d => d.User).FirstOrDefaultAsync(d => d.Id == req.DoctorId);
         var patient = await _db.Patients.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == req.PatientId);
         if (doctor is null || patient is null) return BadRequest(new { error = "Doctor or patient not found." });
 
-        // basic overlap check (same doctor)
-        var overlap = await _db.Appointments.AnyAsync(a =>
-            a.DoctorId == req.DoctorId &&
-            a.Status != "Cancelled" &&
-            req.StartsAtUtc < a.EndsAtUtc &&
-            req.EndsAtUtc > a.StartsAtUtc);
+        // overlap check — only active (Scheduled/Confirmed) appointments block new bookings
+        var conflicting = await _db.Appointments
+            .Include(a => a.Patient).ThenInclude(p => p.User)
+            .Where(a =>
+                a.DoctorId == req.DoctorId &&
+                (a.Status == "Scheduled" || a.Status == "Confirmed") &&
+                req.StartsAtUtc < a.EndsAtUtc &&
+                req.EndsAtUtc > a.StartsAtUtc)
+            .Select(a => new { a.StartsAtUtc, PatientName = a.Patient.User.FullName })
+            .FirstOrDefaultAsync();
 
-        if (overlap) return Conflict(new { error = "Doctor already has an appointment in this time window." });
+        if (conflicting is not null)
+            return Conflict(new { error = $"Doctor already has an appointment with {conflicting.PatientName} at {conflicting.StartsAtUtc:dd/MM/yyyy HH:mm} UTC in this time window." });
 
         var appt = new Appointment
         {
@@ -157,7 +165,7 @@ public sealed class AppointmentsController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/status")]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Doctor}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Doctor},{Roles.Receptionist}")]
     public async Task<ActionResult> UpdateStatus(Guid id, [FromBody] UpdateAppointmentStatusRequest req)
     {
         var appt = await _db.Appointments
@@ -167,14 +175,14 @@ public sealed class AppointmentsController : ControllerBase
 
         if (appt is null) return NotFound();
 
-        var allowed = new[] { "Scheduled", "Completed", "Cancelled" };
+        var allowed = new[] { "Scheduled", "Confirmed", "Completed", "Cancelled", "NoShow" };
         if (!allowed.Contains(req.Status, StringComparer.OrdinalIgnoreCase))
-            return BadRequest(new { error = "Status must be Scheduled, Completed, or Cancelled." });
+            return BadRequest(new { error = "Status must be Scheduled, Confirmed, Completed, Cancelled, or NoShow." });
 
         appt.Status = req.Status;
         await _db.SaveChangesAsync();
 
-        await _notifications.CreateAsync(appt.Patient.UserId, "Appointment", $"Appointment {appt.Id} status changed to {appt.Status}");
+        await _notifications.CreateAsync(appt.Patient.UserId, "Appointment", $"Your appointment with Dr. {appt.Doctor.User.FullName} on {appt.StartsAtUtc:dd/MM/yyyy HH:mm} has been updated to: {appt.Status}.");
         await _logs.LogAsync(User.GetUserId(), "AppointmentStatusChanged", $"AppointmentId={appt.Id};Status={appt.Status}");
 
         return NoContent();

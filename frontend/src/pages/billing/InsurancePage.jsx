@@ -92,6 +92,24 @@ export default function InsurancePage() {
     setReviewOpen(true)
   }
 
+  const handleExportCsv = () => {
+    const headers = ['Patient', 'Company', 'Policy', 'Claim Amount', 'Status', 'Submitted']
+    const rows = list.map(r => [
+      r.patientName, r.insuranceCompany, r.policyNumber,
+      r.claimAmount?.toFixed(2) ?? '0', r.status, formatDate(r.submittedAtUtc),
+    ])
+    const csv = [headers, ...rows]
+      .map(row => row.map(v => `"${(v ?? '').toString().replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'insurance-claims.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const handleReview = (e) => {
     e.preventDefault()
     if (!reviewClaim) return
@@ -134,9 +152,14 @@ export default function InsurancePage() {
         title={t('pages.insurance.title')}
         subtitle={t('pages.insurance.subtitle')}
         actions={
-          hasPermission('insurance.write') && (
-            <Button variant="primary" onClick={() => setCreateOpen(true)}>New claim</Button>
-          )
+          <>
+            {list.length > 0 && (
+              <Button variant="secondary" onClick={handleExportCsv}>Export CSV</Button>
+            )}
+            {hasPermission('insurance.write') && (
+              <Button variant="primary" onClick={() => setCreateOpen(true)}>New claim</Button>
+            )}
+          </>
         }
       />
       <Card>

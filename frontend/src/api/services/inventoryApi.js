@@ -7,4 +7,5 @@ export const inventoryApi = {
   update: (id, data) => api.put(`/inventory/${id}`, data),
   getMovements: (id) => api.get(`/inventory/${id}/movements`),
   addMovement: (id, data) => api.post(`/inventory/${id}/movements`, data),
+  delete: (id) => api.delete(`/inventory/${id}`),
 }
