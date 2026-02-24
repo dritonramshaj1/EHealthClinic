@@ -43,7 +43,7 @@ public sealed class InventoryController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateInventoryItemRequest request)
     {
         var result = await _inventory.CreateAsync(request);
-        await _audit.LogAsync(GetUserId(), "Create", "InventoryItem", result.Id.ToString(), $"Added inventory item: {result.Name}");
+        await _audit.LogAsync(GetUserId(), "Create", "InventoryItem", null, result.Id.ToString(), $"Added inventory item: {result.Name}");
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
@@ -53,7 +53,7 @@ public sealed class InventoryController : ControllerBase
     {
         var result = await _inventory.UpdateAsync(id, request);
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Update", "InventoryItem", id.ToString(), $"Updated: {result.Name}");
+        await _audit.LogAsync(GetUserId(), "Update", "InventoryItem", null, id.ToString(), $"Updated: {result.Name}");
         return Ok(result);
     }
 
@@ -71,8 +71,18 @@ public sealed class InventoryController : ControllerBase
     {
         request = request with { RecordedByUserId = GetUserId() };
         var result = await _inventory.AddMovementAsync(id, request);
-        await _audit.LogAsync(GetUserId(), "Movement", "InventoryItem", id.ToString(), $"{request.MovementType}: {request.Quantity} units");
+        await _audit.LogAsync(GetUserId(), "Movement", "InventoryItem", null, id.ToString(), $"{request.MovementType}: {request.Quantity} units");
         return Ok(result);
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "inventory.write")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var deleted = await _inventory.DeleteAsync(id);
+        if (!deleted) return NotFound();
+        await _audit.LogAsync(GetUserId(), "Delete", "InventoryItem", null, id.ToString(), "Inventory item deleted");
+        return NoContent();
     }
 
     private Guid GetUserId()

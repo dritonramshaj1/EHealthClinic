@@ -45,7 +45,7 @@ public sealed class LabController : ControllerBase
     public async Task<IActionResult> CreateOrder([FromBody] CreateLabOrderRequest request)
     {
         var result = await _lab.CreateOrderAsync(request);
-        await _audit.LogAsync(GetUserId(), "Create", "LabOrder", result.Id.ToString(), $"Lab order for patient {result.PatientId}");
+        await _audit.LogAsync(GetUserId(), "Create", "LabOrder", null, result.Id.ToString(), $"Lab order for patient {result.PatientId}");
         return CreatedAtAction(nameof(GetOrderById), new { id = result.Id }, result);
     }
 
@@ -55,7 +55,7 @@ public sealed class LabController : ControllerBase
     {
         var result = await _lab.UpdateOrderStatusAsync(id, request.Status);
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Update", "LabOrder", id.ToString(), $"Status → {request.Status}");
+        await _audit.LogAsync(GetUserId(), "Update", "LabOrder", null, id.ToString(), $"Status → {request.Status}");
         return Ok(result);
     }
 
@@ -76,14 +76,14 @@ public sealed class LabController : ControllerBase
         if (order is null) return NotFound();
 
         var result = await _lab.AddResultAsync(orderId, request);
-        await _audit.LogAsync(GetUserId(), "Create", "LabResult", result.Id.ToString(), $"Result added for order {orderId}");
+        await _audit.LogAsync(GetUserId(), "Create", "LabResult", null, result.Id.ToString(), $"Result added for order {orderId}");
 
         var doctor = await _db.Doctors.FindAsync(order.DoctorId);
         if (doctor != null)
             await _notifications.CreateAsync(doctor.UserId, "Lab", $"Rezultat i ri i analizës për porosinë e lab (test: {result.TestName}).");
         var patient = await _db.Patients.FindAsync(order.PatientId);
         if (patient != null)
-            await _notifications.CreateAsync(patient.UserId, "Lab", "Rezultatet e analizës tuaja janë gatuar. Kontrolloni në Laborator.");
+            await _notifications.CreateAsync(patient.UserId, "Lab", "Rezultatet e analizës tuaja janë gati. Kontrolloni në Laborator.");
         return Ok(result);
     }
 

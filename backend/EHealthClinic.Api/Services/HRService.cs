@@ -67,6 +67,29 @@ public sealed class HRService : IHRService
             .FirstOrDefaultAsync();
     }
 
+    public async Task<StaffShiftResponse?> UpdateShiftAsync(Guid id, UpdateStaffShiftRequest request)
+    {
+        var shift = await _db.StaffShifts.FindAsync(id);
+        if (shift is null) return null;
+        shift.BranchId = request.BranchId;
+        shift.ShiftStartUtc = request.ShiftStartUtc;
+        shift.ShiftEndUtc = request.ShiftEndUtc;
+        shift.ShiftType = request.ShiftType;
+        shift.Notes = request.Notes;
+        await _db.SaveChangesAsync();
+        return await _db.StaffShifts.Include(s => s.User).Include(s => s.Branch)
+            .Where(s => s.Id == id).Select(s => ToShiftResponse(s)).FirstOrDefaultAsync();
+    }
+
+    public async Task<bool> DeleteShiftAsync(Guid id)
+    {
+        var shift = await _db.StaffShifts.FindAsync(id);
+        if (shift is null) return false;
+        _db.StaffShifts.Remove(shift);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<List<LeaveRequestResponse>> GetLeaveRequestsAsync(Guid? userId = null, string? status = null)
     {
         var q = _db.LeaveRequests.Include(l => l.User).AsQueryable();

@@ -47,7 +47,7 @@ public sealed class PrescriptionsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreatePrescriptionRequest request)
     {
         var result = await _prescriptions.CreateAsync(request);
-        await _audit.LogAsync(GetUserId(), "Create", "Prescription", result.Id.ToString(), $"Prescription issued for patient {result.PatientId}");
+        await _audit.LogAsync(GetUserId(), "Create", "Prescription", null, result.Id.ToString(), $"Prescription issued for patient {result.PatientId}");
         var patient = await _db.Patients.FindAsync(result.PatientId);
         if (patient != null)
             await _notifications.CreateAsync(patient.UserId, "Prescription", "Ju është lëshuar një recetë e re. Kontrolloni te Recetat.");
@@ -60,7 +60,7 @@ public sealed class PrescriptionsController : ControllerBase
     {
         var result = await _prescriptions.UpdateStatusAsync(id, request.Status);
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Update", "Prescription", id.ToString(), $"Status → {request.Status}");
+        await _audit.LogAsync(GetUserId(), "Update", "Prescription", null, id.ToString(), $"Status → {request.Status}");
         return Ok(result);
     }
 
@@ -70,7 +70,7 @@ public sealed class PrescriptionsController : ControllerBase
     {
         var result = await _prescriptions.UpdateStatusAsync(id, "Cancelled");
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Cancel", "Prescription", id.ToString(), "Prescription cancelled");
+        await _audit.LogAsync(GetUserId(), "Cancel", "Prescription", null, id.ToString(), "Prescription cancelled");
         return Ok(result);
     }
 

@@ -386,7 +386,7 @@ public sealed class ExportController : ControllerBase
                     col.Item().Row(row =>
                     {
                         if (logoBytes is not null)
-                            row.ConstantItem(36).Image(logoBytes, ImageScaling.FitArea);
+                            row.ConstantItem(36).Image(logoBytes).FitArea();
                         row.RelativeItem().PaddingLeft(logoBytes is not null ? 10 : 0).Column(inner =>
                         {
                             inner.Item().Text(title).FontSize(18).Bold()
@@ -587,7 +587,7 @@ public sealed class ExportController : ControllerBase
                     col.Item().Row(row =>
                     {
                         if (logoBytes is not null)
-                            row.ConstantItem(36).Image(logoBytes, ImageScaling.FitArea);
+                            row.ConstantItem(36).Image(logoBytes).FitArea();
                         row.RelativeItem().PaddingLeft(logoBytes is not null ? 10 : 0).Column(inner =>
                         {
                             inner.Item().Text(title).FontSize(20).Bold().FontColor(PdfColor.FromHex("6366f1"));

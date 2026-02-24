@@ -41,7 +41,7 @@ public sealed class BranchesController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateBranchRequest request)
     {
         var result = await _branches.CreateAsync(request);
-        await _audit.LogAsync(GetUserId(), "Create", "Branch", result.Id.ToString(), $"Created branch: {result.Name}");
+        await _audit.LogAsync(GetUserId(), "Create", "Branch", null, result.Id.ToString(), $"Created branch: {result.Name}");
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
@@ -51,7 +51,7 @@ public sealed class BranchesController : ControllerBase
     {
         var result = await _branches.UpdateAsync(id, request);
         if (result is null) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Update", "Branch", id.ToString(), $"Updated branch: {result.Name}");
+        await _audit.LogAsync(GetUserId(), "Update", "Branch", null, id.ToString(), $"Updated branch: {result.Name}");
         return Ok(result);
     }
 
@@ -61,7 +61,7 @@ public sealed class BranchesController : ControllerBase
     {
         var ok = await _branches.DeleteAsync(id);
         if (!ok) return NotFound();
-        await _audit.LogAsync(GetUserId(), "Delete", "Branch", id.ToString(), "Deleted branch");
+        await _audit.LogAsync(GetUserId(), "Delete", "Branch", null, id.ToString(), "Deleted branch");
         return NoContent();
     }
 
